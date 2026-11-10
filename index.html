@@ -50,7 +50,8 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 @media (max-width:560px){.cta{font-size:0;gap:0;padding:10px}}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .lg-ink{display:none}:root:not([data-theme="light"]) .lg-white{display:block}}
 :root[data-theme="dark"] .lg-ink{display:none}:root[data-theme="dark"] .lg-white{display:block}
-.cta{justify-self:end;all:unset;cursor:pointer;justify-self:end;background:var(--btn);color:var(--btn-ink);font-weight:600;font-size:15px;padding:10px 18px;border-radius:999px;display:flex;gap:6px;align-items:center;white-space:nowrap}
+.cta{all:unset;cursor:pointer;grid-column:3;justify-self:end;background:transparent;color:var(--ink);border:1px solid var(--line-2);font-weight:500;font-size:15px;padding:9px 18px;border-radius:999px;display:flex;gap:6px;align-items:center;white-space:nowrap;transition:background .2s ease,border-color .2s ease}
+.cta:hover{background:color-mix(in srgb,var(--ink) 8%,transparent);border-color:var(--ink-3)}
 .cta:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 
 .main{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:16px;align-items:start}
@@ -215,7 +216,6 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
         <p class="lede">Thirteen colour families, the semantic tokens that put them to work, and the health signals that colour a lab report. All from the Dopamine design system.</p>
         <div class="ctas">
           <button class="btn solid big" id="explore">Explore colours <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
-          <button class="btn big" id="copyAll2">Copy all tokens</button>
         </div>
       </div>
       <div class="collage" id="collage">
@@ -472,7 +472,7 @@ $("feature").onclick=()=>go("gallery",$("feature").dataset.f);$("feature").style
 const primN=Object.values(D.fam).reduce((a,f)=>a+f.length,0);
 $("facts").innerHTML=[[13,"colour families"],[primN,"primitive tokens"],[D.sem.length,"semantic tokens"],[D.ut.length,"health & category tokens"]]
   .map(([n,l])=>`<div class="fact"><b>${n}</b><span>${l}</span></div>`).join("");
-$("copyAll2").onclick=()=>$("copyAll").click();
+
 const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
 function setView(v){document.documentElement.dataset.view=v}
 function go(v,fam){
