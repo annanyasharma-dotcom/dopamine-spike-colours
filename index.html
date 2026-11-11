@@ -30,7 +30,7 @@ button{font:inherit;color:inherit}
 /* top bar */
 .top{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:12px;padding:8px;border:1px solid color-mix(in srgb,var(--line) 70%,transparent);border-radius:999px;background:color-mix(in srgb,var(--page) 62%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.6);backdrop-filter:blur(18px) saturate(1.6);position:sticky;top:calc(env(safe-area-inset-top,0px) + 10px);z-index:20;box-shadow:0 10px 30px -18px rgba(0,0,0,.45),inset 0 1px 0 color-mix(in srgb,var(--panel) 55%,transparent)}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:21;background:var(--page)}
-.segs{margin:10px 16px 12px;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px;background:var(--field);border-radius:999px}
+.segs{margin:10px 16px 12px;display:grid;grid-template-columns:repeat(2,1fr);gap:4px;padding:4px;background:var(--field);border-radius:999px}
 .seg{all:unset;cursor:pointer;text-align:center;font-size:14px;font-weight:500;padding:8px 6px;border-radius:999px;color:var(--ink-2)}
 .seg[aria-selected="true"]{background:var(--btn);color:var(--btn-ink);font-weight:600}
 .seg:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
@@ -231,7 +231,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     <aside class="lib">
       <div class="lib-head"><h2>Library</h2><button class="round" id="sortBtn" title="Sort by contrast" aria-label="Sort by contrast">≡▯</button></div>
       <label class="field"><input id="q" placeholder="Search" aria-label="Search palettes"><span class="kbd">⌘ K</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></label>
-      <div class="segs" role="tablist" aria-label="Show palettes"><button class="seg" role="tab" data-f="0" aria-selected="true">All</button><button class="seg" role="tab" data-f="1" aria-selected="false">Primitives</button><button class="seg" role="tab" data-f="2" aria-selected="false">Semantic</button></div>
+      <div class="segs" role="tablist" aria-label="Show palettes"><button class="seg" role="tab" data-f="1" aria-selected="true">Primitives</button><button class="seg" role="tab" data-f="2" aria-selected="false">Semantic</button></div>
       <div class="list" id="list"></div>
     </aside>
 
@@ -357,7 +357,11 @@ pals.forEach(p=>{
 });
 
 /* ---------- UI ---------- */
-let cur=pals[0].id, filter=0, sorted=false;
+let cur=pals[0].id, filter=1, sorted=false;
+const oklchStr=h=>{const [L,a,b]=lab(h),C=Math.hypot(a,b);let H=Math.atan2(b,a)*180/Math.PI;if(H<0)H+=360;
+  return `${(L*100).toFixed(1)}% ${C.toFixed(3)} ${C<.002?0:Math.round(H)}`};
+const BASE_TEXT=Object.fromEntries(D.sem.filter(x=>/^text\/[a-z]+\/base$/.test(x[0])).map(x=>[x[0].split("/")[1],x[2]]));
+const syncTabs=()=>document.querySelectorAll(".seg").forEach(x=>x.setAttribute("aria-selected",+x.dataset.f===filter));
 const FIL=[["All palettes",()=>true],["Primitives",p=>p.kind==="Primitive"],["Semantic",p=>p.kind!=="Primitive"]];
 function renderList(){
   const q=$("q").value.trim().toLowerCase();
@@ -379,15 +383,18 @@ const copyIc='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke
 function show(id){
   cur=id;const p=pals.find(x=>x.id===id);
   try{localStorage.setItem("dop-pal",id)}catch(e){}
+  filter=p.kind==="Primitive"?1:2;syncTabs();
   renderList();
   const many=p.sw.length>5;
   $("cols").className="cols"+(many?" many":"");
-  $("cols").innerHTML=p.sw.map(s=>{const ink=onCol(s.hex),[r,g,b]=hexRgb(s.hex),[H,S2,L]=hsl(s.hex),c=cmyk(s.hex);
-    const div=ink==="#FFFFFF"?"rgba(255,255,255,.18)":"rgba(0,0,0,.12)",hov=ink==="#FFFFFF"?"rgba(255,255,255,.08)":"rgba(0,0,0,.05)";
+  $("cols").innerHTML=p.sw.map(s=>{const [r,g,b]=hexRgb(s.hex),[H,S2,L]=hsl(s.hex),c=cmyk(s.hex);
+    const parts=s.tok.split("/"),lvl=parts[parts.length-1],baseInk=s.alias&&/^subtle(r)?$/.test(lvl)&&BASE_TEXT[parts[1]];
+    const ink=baseInk||onCol(s.hex),tone=onCol(s.hex);
+    const div=tone==="#FFFFFF"?"rgba(255,255,255,.18)":"rgba(0,0,0,.12)",hov=tone==="#FFFFFF"?"rgba(255,255,255,.08)":"rgba(0,0,0,.05)";
     const kv=(k,v,cp=v)=>`<button class="kv" data-v="${cp}" title="Copy ${k}"><span><small>${k}</small>${v}</span>${copyIc}</button>`;
     const rows=s.alias
-      ? kv("TOKEN",s.tok)+kv("MAPS TO",s.alias.replace("color/",""),s.alias)+kv("HEX",s.hex)+kv("RGB",`${r} ${g} ${b}`)+kv("HSL",`${H}° ${S2}% ${L}%`)
-      : kv("HEX",s.hex)+kv("RGB",`${r} ${g} ${b}`)+kv("CMYK",c.join(" "))+kv("HSL",`${H}° ${S2}% ${L}%`)+kv("TOKEN",s.tok);
+      ? kv("TOKEN",s.tok)+kv("MAPS TO",s.alias.replace("color/",""),s.alias)+kv("HEX",s.hex)+kv("RGB",`${r} ${g} ${b}`)+kv("HSL",`${H}° ${S2}% ${L}%`)+kv("OKLCH",oklchStr(s.hex),`oklch(${oklchStr(s.hex)})`)
+      : kv("HEX",s.hex)+kv("RGB",`${r} ${g} ${b}`)+kv("CMYK",c.join(" "))+kv("HSL",`${H}° ${S2}% ${L}%`)+kv("OKLCH",oklchStr(s.hex),`oklch(${oklchStr(s.hex)})`)+kv("TOKEN",s.tok);
     return `<div class="col" style="background:${s.hex};color:${ink};--div:${div};--hov:${hov}">
       <div class="hd"><span class="pc">${s.big}</span><span class="nm">${s.alias?"":s.sub}</span></div>${rows}</div>`}).join("");
   $("cols").querySelectorAll(".kv").forEach(b=>b.onclick=()=>copy(b.dataset.v));
@@ -429,7 +436,7 @@ $("copyAll").onclick=()=>{const lines=[];Object.entries(D.fam).forEach(([f,s])=>
   copy(`:root {\n${lines.join("\n")}\n}`,`Copied ${lines.length} tokens as CSS`)};
 $("q").oninput=renderList;
 document.addEventListener("keydown",e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"){e.preventDefault();$("q").focus()}});
-document.querySelectorAll(".seg").forEach(b=>b.onclick=()=>{filter=+b.dataset.f;document.querySelectorAll(".seg").forEach(x=>x.setAttribute("aria-selected",x===b));renderList()});
+document.querySelectorAll(".seg").forEach(b=>b.onclick=()=>{filter=+b.dataset.f;syncTabs();renderList()});
 $("sortBtn").onclick=()=>{sorted=!sorted;toast(sorted?"Sorted by contrast":"Grouped by collection");renderList()};
 function setTheme(t){document.documentElement.dataset.theme=t;$("tLight").setAttribute("aria-pressed",t==="light");$("tDark").setAttribute("aria-pressed",t==="dark");try{localStorage.setItem("dop-theme",t)}catch(e){}}
 $("tLight").onclick=()=>setTheme("light");$("tDark").onclick=()=>setTheme("dark");
