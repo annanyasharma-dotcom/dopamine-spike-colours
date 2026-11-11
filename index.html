@@ -360,7 +360,18 @@ pals.forEach(p=>{
 let cur=pals[0].id, filter=1, sorted=false;
 const oklchStr=h=>{const [L,a,b]=lab(h),C=Math.hypot(a,b);let H=Math.atan2(b,a)*180/Math.PI;if(H<0)H+=360;
   return `${(L*100).toFixed(1)}% ${C.toFixed(3)} ${C<.002?0:Math.round(H)}`};
-const BASE_TEXT=Object.fromEntries(D.sem.filter(x=>/^text\/[a-z]+\/base$/.test(x[0])).map(x=>[x[0].split("/")[1],x[2]]));
+/* Text on subtle/subtler: the group's own base token; if that fails AA (4.5:1), step deeper through the system until one passes. */
+const SEMX=Object.fromEntries(D.sem.map(x=>[x[0],x]));
+function textFor(s){
+  const p=s.tok.split("/");if(!s.alias||!/^subtle(r)?$/.test(p[2]))return null;
+  const g=p[0]+"/"+p[1],base=SEMX[g+"/base"]||SEMX[g+"/moderate"];if(!base)return null;
+  const fam=base[1].split("/")[1],steps=D.fam[fam].map(x=>x[0]),bi=steps.indexOf(base[1].split("/")[2]);
+  const cands=[[base[0],base[2],false]];
+  ["bold","intense"].forEach(l=>{const t=SEMX[g+"/"+l];if(t)cands.push([t[0],t[2],true])});
+  steps.slice(bi+1).forEach(st=>cands.push([`${fam}/${st}`,D.fam[fam].find(x=>x[0]===st)[1],true]));
+  for(const [tok,hex,fb] of cands){const r=cr(s.hex,hex);if(r>=4.5)return {tok,hex,fb,r}}
+  const [tok,hex]=cands[cands.length-1];return {tok,hex,fb:true,r:cr(s.hex,hex)};
+}
 const syncTabs=()=>document.querySelectorAll(".seg").forEach(x=>x.setAttribute("aria-selected",+x.dataset.f===filter));
 const FIL=[["All palettes",()=>true],["Primitives",p=>p.kind==="Primitive"],["Semantic",p=>p.kind!=="Primitive"]];
 function renderList(){
@@ -388,12 +399,13 @@ function show(id){
   const many=p.sw.length>5;
   $("cols").className="cols"+(many?" many":"");
   $("cols").innerHTML=p.sw.map(s=>{const [r,g,b]=hexRgb(s.hex),[H,S2,L]=hsl(s.hex),c=cmyk(s.hex);
-    const parts=s.tok.split("/"),lvl=parts[parts.length-1],baseInk=s.alias&&/^subtle(r)?$/.test(lvl)&&BASE_TEXT[parts[1]];
-    const ink=baseInk||onCol(s.hex),tone=onCol(s.hex);
+    const tf=textFor(s);
+    const ink=tf?tf.hex:onCol(s.hex),tone=onCol(s.hex);
     const div=tone==="#FFFFFF"?"rgba(255,255,255,.18)":"rgba(0,0,0,.12)",hov=tone==="#FFFFFF"?"rgba(255,255,255,.08)":"rgba(0,0,0,.05)";
     const kv=(k,v,cp=v)=>`<button class="kv" data-v="${cp}" title="Copy ${k}"><span><small>${k}</small>${v}</span>${copyIc}</button>`;
     const rows=s.alias
       ? kv("TOKEN",s.tok)+kv("MAPS TO",s.alias.replace("color/",""),s.alias)+kv("HEX",s.hex)+kv("RGB",`${r} ${g} ${b}`)+kv("HSL",`${H}° ${S2}% ${L}%`)+kv("OKLCH",oklchStr(s.hex),`oklch(${oklchStr(s.hex)})`)
+        +(tf?kv(tf.fb?"TEXT · STEPPED UP FROM BASE":"TEXT · BASE",`${tf.tok} · ${tf.r.toFixed(1)}:1`,tf.tok):"")
       : kv("HEX",s.hex)+kv("RGB",`${r} ${g} ${b}`)+kv("CMYK",c.join(" "))+kv("HSL",`${H}° ${S2}% ${L}%`)+kv("OKLCH",oklchStr(s.hex),`oklch(${oklchStr(s.hex)})`)+kv("TOKEN",s.tok);
     return `<div class="col" style="background:${s.hex};color:${ink};--div:${div};--hov:${hov}">
       <div class="hd"><span class="pc">${s.big}</span><span class="nm">${s.alias?"":s.sub}</span></div>${rows}</div>`}).join("");
