@@ -146,6 +146,10 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .grp[aria-expanded="true"] svg{transform:rotate(90deg)}
 .grp[aria-expanded="true"] .gc{color:var(--ink-2)}
 .gbody .item{padding-left:24px}
+.grp.sub{font-size:16px;padding:12px 20px 12px 34px;background:var(--panel)}
+.grp.sub[aria-expanded="true"]{top:57px;z-index:1}
+.gbody.sub .item{padding-left:38px}
+.gbody.sub .sec{padding-left:38px}
 .gbody .sec{padding-left:24px}
 .sec{padding:14px 20px 6px;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--line)}
 .stats dt{color:var(--ink-3)}.stats dd{margin:0;text-align:right;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
@@ -428,7 +432,7 @@ function textFor(s){
   for(const [tok,hex,fb] of cands){const r=cr(s.hex,hex);if(r>=4.5)return {tok,hex,fb,r}}
   const [tok,hex]=cands[cands.length-1];return {tok,hex,fb:true,r:cr(s.hex,hex)};
 }
-const syncTabs=()=>{openSec=filter};
+const syncTabs=()=>{if(filter<=2){openSec="c";openSub=filter}else openSec=filter};
 const FIL=[["All palettes",()=>true],["Primitives",p=>p.kind==="Primitive"],["Semantic",p=>p.kind!=="Primitive"],["Type",()=>false],["Layout",()=>false],["Elevation",()=>false]];
 let openSec=null;
 const SECS=[{f:1,name:"Primitives"},{f:2,name:"Semantic"},{f:3,name:"Type"},{f:4,name:"Layout"},{f:5,name:"Elevation"}];
@@ -443,7 +447,7 @@ function colourItems(fi,q){
     html+=`<button class="item" data-id="${p.id}" aria-current="${p.id===cur}">
       <div class="row1"><div class="bar">${p.sw.map(s=>`<i style="background:${s.hex}"></i>`).join("")}</div>
       <span class="mx" style="background:${top.hex};color:${onCol(top.hex)}">${p.best_c.toFixed(1)}</span></div>
-      <div class="row2"><span class="n"><strong>${p.name}</strong><span class="chipx">${p.path||p.kind}</span></span>
+      <div class="row2"><span class="n"><strong>${p.name}</strong>${p.path?`<span class="chipx">${p.path}</span>`:""}</span>
       ${p.pairs?'<span class="aa ok">✓ AA</span>':'<span class="aa no">× AA</span>'}</div></button>`});
   return [html,n];
 }
@@ -456,17 +460,33 @@ function secBody(f,q){
   const h=stripSec(renderTypeList(q,"elev"));return [h,countItems(h)];
 }
 const SEC_LABEL={1:n=>`${n} families`,2:n=>`${n} groups`,3:n=>`${n} groups`,4:n=>`${n} groups`,5:n=>`6 levels`};
+/* openSec: which top section is open ("c" = Colours, 3 Type, 4 Layout, 5 Elevation, 0 none); openSub: 1 Primitives, 2 Semantic, 0 none */
+let openSub=1;
 function renderList(){
   const q=$("q").value.trim().toLowerCase();
-  if(openSec===null)openSec=filter;
+  if(openSec===null){openSec=filter<=2?"c":filter;if(filter<=2)openSub=filter}
+  const head=(key,name,label,open,sub)=>`<button class="grp${sub?" sub":""}" data-k="${key}" aria-expanded="${open}">${chev}<span>${name}</span><span class="gc">${label}</span></button>`;
   let html="";
-  SECS.forEach(s=>{const [body,n]=secBody(s.f,q);if(q&&!n)return;
-    const open=q?true:openSec===s.f;
-    html+=`<button class="grp" data-f="${s.f}" aria-expanded="${open}">${chev}<span>${s.name}</span><span class="gc">${SEC_LABEL[s.f](n)}</span></button>`;
-    if(open)html+=`<div class="gbody">${body}</div>`});
+  const [pB,pN]=secBody(1,q),[sB,sN]=secBody(2,q);
+  if(!q||pN||sN){
+    const cOpen=q?true:openSec==="c";
+    html+=head("c","Colours",`${pN+sN} palettes`,cOpen,false);
+    if(cOpen){
+      html+=`<div class="gbody">`;
+      [[1,"Primitives",pB,pN],[2,"Semantic",sB,sN]].forEach(([k,name,body,n])=>{if(q&&!n)return;
+        const o=q?true:openSub===k;html+=head("s"+k,name,SEC_LABEL[k](n),o,true);if(o)html+=`<div class="gbody sub">${body}</div>`});
+      html+=`</div>`;
+    }
+  }
+  [[3,"Type"],[4,"Layout"],[5,"Elevation"]].forEach(([k,name])=>{const [body,n]=secBody(k,q);if(q&&!n)return;
+    const o=q?true:openSec===k;html+=head(k,name,SEC_LABEL[k](n),o,false);if(o)html+=`<div class="gbody">${body}</div>`});
   $("list").innerHTML=html||`<p style="padding:20px;color:var(--ink-3)">Nothing matches “${q}”.</p>`;
-  $("list").querySelectorAll(".grp").forEach(b=>b.onclick=()=>{const f=+b.dataset.f;openSec=openSec===f?0:f;renderList();
-    if(openSec===f){const el=$("list").querySelector(`.grp[data-f="${f}"]`);el&&el.scrollIntoView({block:"nearest"})}});
+  $("list").querySelectorAll(".grp").forEach(b=>b.onclick=()=>{const k=b.dataset.k;
+    if(k.startsWith("s")){const s=+k.slice(1);openSub=openSub===s?0:s}
+    else{const v=k==="c"?"c":+k;openSec=openSec===v?0:v;if(v==="c"&&openSec==="c"&&!openSub)openSub=1}
+    /* nothing open falls back to Colours › Primitives */
+    if(openSec===0||(openSec==="c"&&!openSub)){openSec="c";openSub=1}
+    renderList();const el=$("list").querySelector(`.grp[data-k="${k}"]`);el&&el.scrollIntoView({block:"nearest"})});
   $("list").querySelectorAll(".item").forEach(b=>b.onclick=()=>{const id=b.dataset.id;
     (id.startsWith("type-")?showType:id.startsWith("lay-")?showLayout:show)(id)});
 }
