@@ -1,0 +1,49 @@
+/* Text-size styles (font family: Figtree; weight comes from each name) */
+:root {
+  --footernote: 9px;
+  --display--medium: 40px;
+  --display--semibold: 40px;
+  --display--bold: 40px;
+  --h1--semibold: 32px;
+  --h1--bold: 32px;
+  --h2--semibold: 28px;
+  --h2--bold: 28px;
+  --h3--semibold: 24px;
+  --h3--bold: 24px;
+  --h4--semibold: 20px;
+  --h4--bold: 20px;
+  --h5--semibold: 18px;
+  --h5--bold: 18px;
+  --h6--semibold: 16px;
+  --h6--bold: 16px;
+  --label-lg--regular: 16px;
+  --label-lg--medium: 16px;
+  --label-lg--semibold: 16px;
+  --label-lg--bold: 16px;
+  --label-base--regular: 14px;
+  --label-base--medium: 14px;
+  --label-base--semibold: 14px;
+  --label-base--bold: 14px;
+  --label-sm--regular: 12px;
+  --label-sm--medium: 12px;
+  --label-sm--semibold: 12px;
+  --label-sm--bold: 12px;
+  --body-lg--regular: 16px;
+  --body-lg--semibold: 16px;
+  --body-base--regular: 14px;
+  --body-base--semibold: 14px;
+  --body-sm--regular: 12px;
+  --body-sm--semibold: 12px;
+  --caption-base--regular: 11px;
+  --caption-base--medium: 11px;
+  --caption-sm--regular: 10px;
+  --caption-sm--medium: 10px;
+
+  /* Effect styles */
+  --xs: 0px 2px 3px rgba(0, 0, 0, 0.04);
+  --s: 0px 2px 6px rgba(0, 0, 0, 0.05), 0px -1px 3px rgba(0, 0, 0, 0.03);
+  --md: 0px 4px 6px rgba(0, 0, 0, 0.05), 0px -2px 3px rgba(0, 0, 0, 0.03);
+  --lg: 0px 6px 6px rgba(0, 0, 0, 0.05), 0px -3px 4px rgba(0, 0, 0, 0.03);
+  --xl: 0px 8px 10px rgba(0, 0, 0, 0.05), 0px -2px 8px rgba(0, 0, 0, 0.06);
+  --xxl: 0px 7px 8.800000190734863px rgba(0, 0, 0, 0.07), 0px -6px 8px rgba(0, 0, 0, 0.06);
+}
