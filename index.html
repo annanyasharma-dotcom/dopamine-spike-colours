@@ -146,6 +146,11 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .grp[aria-expanded="true"] svg{transform:rotate(90deg)}
 .grp[aria-expanded="true"] .gc{color:var(--ink-2)}
 .gbody .item{padding-left:24px}
+.ctabs{grid-template-columns:repeat(2,minmax(0,1fr));margin:12px 16px 10px}
+.ctabs .seg{font-size:14px;padding:8px 6px}
+.ctabs .sn{opacity:.6;font-weight:500;margin-left:2px}
+.gbody.sub .item{padding-left:24px}
+.gbody.sub .sec{padding-left:24px}
 .grp.sub{font-size:16px;padding:12px 20px 12px 34px;background:var(--panel)}
 .grp.sub[aria-expanded="true"]{top:57px;z-index:1}
 .gbody.sub .item{padding-left:38px}
@@ -447,7 +452,7 @@ function colourItems(fi,q){
     html+=`<button class="item" data-id="${p.id}" aria-current="${p.id===cur}">
       <div class="row1"><div class="bar">${p.sw.map(s=>`<i style="background:${s.hex}"></i>`).join("")}</div>
       <span class="mx" style="background:${top.hex};color:${onCol(top.hex)}">${p.best_c.toFixed(1)}</span></div>
-      <div class="row2"><span class="n"><strong>${p.name}</strong>${p.path?`<span class="chipx">${p.path}</span>`:""}</span>
+      <div class="row2"><span class="n"><strong title="${p.name}">${p.kind==="Semantic"?p.name.replace(" "+p.group,""):p.name}</strong>${p.path?`<span class="chipx">${p.path}</span>`:""}</span>
       ${p.pairs?'<span class="aa ok">✓ AA</span>':'<span class="aa no">× AA</span>'}</div></button>`});
   return [html,n];
 }
@@ -473,8 +478,11 @@ function renderList(){
     html+=head("c","Colours",`${pN+sN} palettes`,cOpen,false);
     if(cOpen){
       html+=`<div class="gbody">`;
-      [[1,"Primitives",pB,pN],[2,"Semantic",sB,sN]].forEach(([k,name,body,n])=>{if(q&&!n)return;
-        const o=q?true:openSub===k;html+=head("s"+k,name,SEC_LABEL[k](n),o,true);if(o)html+=`<div class="gbody sub">${body}</div>`});
+      if(q&&!(openSub===1?pN:sN))openSub=pN?1:2;
+      if(!openSub)openSub=1;
+      html+=`<div class="segs ctabs" role="tablist" aria-label="Colour sets">${[[1,"Primitives",pN],[2,"Semantic",sN]].map(([k,name,n])=>
+        `<button class="seg" role="tab" data-s="${k}" aria-selected="${openSub===k}">${name}${q?` <span class="sn">${n}</span>`:""}</button>`).join("")}</div>`;
+      html+=`<div class="gbody sub" role="tabpanel">${openSub===1?pB:sB}</div>`;
       html+=`</div>`;
     }
   }
@@ -482,11 +490,11 @@ function renderList(){
     const o=q?true:openSec===k;html+=head(k,name,SEC_LABEL[k](n),o,false);if(o)html+=`<div class="gbody">${body}</div>`});
   $("list").innerHTML=html||`<p style="padding:20px;color:var(--ink-3)">Nothing matches “${q}”.</p>`;
   $("list").querySelectorAll(".grp").forEach(b=>b.onclick=()=>{const k=b.dataset.k;
-    if(k.startsWith("s")){const s=+k.slice(1);openSub=openSub===s?0:s}
-    else{const v=k==="c"?"c":+k;openSec=openSec===v?0:v;if(v==="c"&&openSec==="c"&&!openSub)openSub=1}
+    {const v=k==="c"?"c":+k;openSec=openSec===v?0:v;if(v==="c"&&openSec==="c"&&!openSub)openSub=1}
     /* nothing open falls back to Colours › Primitives */
     if(openSec===0||(openSec==="c"&&!openSub)){openSec="c";openSub=1}
     renderList();const el=$("list").querySelector(`.grp[data-k="${k}"]`);el&&el.scrollIntoView({block:"nearest"})});
+  $("list").querySelectorAll(".ctabs .seg").forEach(b=>b.onclick=()=>{openSub=+b.dataset.s;renderList()});
   $("list").querySelectorAll(".item").forEach(b=>b.onclick=()=>{const id=b.dataset.id;
     (id.startsWith("type-")?showType:id.startsWith("lay-")?showLayout:show)(id)});
 }
