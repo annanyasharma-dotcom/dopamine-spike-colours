@@ -149,7 +149,9 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .grp-link[aria-current="true"]{background:var(--panel-2);box-shadow:inset 3px 0 0 var(--sel)}
 .grp-link[aria-current="true"] .gc,.grp-link[aria-current="true"] svg{color:var(--ink)}
 .gbody .item{padding-left:24px}
-.ctabs{grid-template-columns:repeat(2,minmax(0,1fr));margin:12px 16px 10px}
+.ctrow{display:flex;align-items:center;gap:8px;margin:12px 16px 10px}
+.ctabs{grid-template-columns:repeat(2,minmax(0,1fr));margin:0;flex:1;min-width:0}
+.ctrow .round{width:44px;height:44px;flex:none}
 .ctabs .seg{font-size:14px;padding:8px 6px}
 .ctabs .sn{opacity:.6;font-weight:500;margin-left:2px}
 .gbody.sub .item{padding-left:24px}
@@ -174,6 +176,8 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .hero{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1fr);gap:clamp(16px,2.2vw,32px);align-items:center;flex:1}
 /* theme switches are instant: no colour fades */
 .no-tx,.no-tx *,.no-tx *::before,.no-tx *::after{transition:none!important}
+/* phones: one theme button on the left to mirror the copy button on the right, so the logo sits dead centre */
+@media (max-width:560px){.theme button[aria-pressed="true"]{display:none}.theme button{color:var(--ink)}.cta{width:42px!important;height:42px!important}}
 @media (max-width:900px){.hero{grid-template-columns:minmax(0,1fr)}}
 .copy{display:flex;flex-direction:column;gap:0;min-width:0}
 .headline{margin:0;font-family:"Bebas Neue","Oswald","Arial Narrow",Impact,sans-serif;font-weight:400;font-size:clamp(52px,min(7vw,12.5vh),124px);line-height:.88;letter-spacing:-.005em;text-transform:uppercase;text-wrap:balance;cursor:default}
@@ -346,6 +350,24 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 /* tiles and cards reset their styles with all:unset, so the rise needs the extra weight */
 .ltile.rise,.ecard.rise,.trow.rise{animation:colIn .5s cubic-bezier(.2,.9,.3,1.1) both;animation-delay:calc(.04s + var(--ci,0) * 45ms)}
 @media (prefers-reduced-motion:reduce){.ltile.rise,.ecard.rise,.trow.rise{animation:none}}
+
+/* sort menu */
+.lib{overflow:visible}
+.list{border-radius:0 0 28px 28px}
+.sortwrap{position:relative}
+.round svg{display:block}
+.round:hover{border-color:var(--ink-3)}
+.round:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.round.on,.round[aria-expanded="true"]{background:var(--btn);color:var(--btn-ink);border-color:var(--btn)}
+.smenu{position:fixed;z-index:40;width:264px;background:var(--panel);border:1px solid var(--line-2);border-radius:18px;padding:8px;box-shadow:0 24px 48px -18px rgba(0,0,0,.5);animation:colIn .22s cubic-bezier(.2,.9,.3,1.2)}
+.sm-h{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding:8px 10px 6px}
+.sm-i{all:unset;cursor:pointer;box-sizing:border-box;width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border-radius:12px}
+.sm-i:hover,.sm-i:focus-visible{background:var(--panel-2)}
+.sm-i:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
+.sm-i span{display:flex;flex-direction:column;gap:1px;min-width:0}
+.sm-i b{font-size:14px;font-weight:600}.sm-i small{font-size:12px;color:var(--ink-3)}
+.sm-i svg{flex:none;opacity:0}.sm-i[aria-checked="true"] svg{opacity:1}
+.sm-note{margin:4px 10px 6px;padding-top:8px;border-top:1px solid var(--line);font-size:12px;color:var(--ink-3)}
 </style>
 </head>
 <body>
@@ -394,8 +416,9 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 
   <div class="main">
     <aside class="lib">
-      <div class="lib-head"><h2>Library</h2><button class="round" id="sortBtn" title="Sort by contrast" aria-label="Sort by contrast">≡▯</button></div>
-      <label class="field"><input id="q" placeholder="Search" aria-label="Search palettes"><span class="kbd">⌘ K</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></label>
+      <div id="sortHome" hidden><div class="sortwrap" id="sortwrap"><button class="round" id="sortBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="smenu" title="Sort palettes" aria-label="Sort palettes"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"/></svg></button></div></div>
+      <div class="smenu" id="smenu" role="menu" aria-label="Sort palettes by" hidden></div>
+      <label class="field" style="margin-top:0"><input id="q" placeholder="Search" aria-label="Search palettes"><span class="kbd">⌘ K</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></label>
       <div class="list" id="list"></div>
     </aside>
 
@@ -522,7 +545,7 @@ pals.forEach(p=>{
 });
 
 /* ---------- UI ---------- */
-let cur=pals[0].id, filter=1, sorted=false;
+let cur=pals[0].id, filter=1, sortMode="default";
 const oklchStr=h=>{const [L,a,b]=lab(h),C=Math.hypot(a,b);let H=Math.atan2(b,a)*180/Math.PI;if(H<0)H+=360;
   return `${(L*100).toFixed(1)}% ${C.toFixed(3)} ${C<.002?0:Math.round(H)}`};
 /* Text on subtle/subtler: the group's own base token; if that fails AA (4.5:1), step deeper through the system until one passes. */
@@ -548,10 +571,10 @@ const SECS=[{f:1,name:"Primitives"},{f:2,name:"Semantic"},{f:3,name:"Type"},{f:4
 const chev='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>';
 function colourItems(fi,q){
   let ps=pals.filter(FIL[fi][1]).filter(p=>!q||(p.name+" "+(p.path||"")+" "+p.sw.map(s=>s.hex+" "+s.tok+" "+(s.alias||"")).join(" ")).toLowerCase().includes(q));
-  if(sorted)ps=[...ps].sort((a,b)=>b.best_c-a.best_c);
+  if(sortMode!=="default")ps=[...ps].sort(SORTFN[sortMode]);
   let html="",last="",n=0;
   ps.forEach(p=>{n++;
-    if(!sorted&&fi===2&&p.group!==last){html+=`<div class="sec">${p.group}${p.kind==="Semantic"?" tokens":""}</div>`;last=p.group}
+    if(sortMode==="default"&&fi===2&&p.group!==last){html+=`<div class="sec">${p.group}${p.kind==="Semantic"?" tokens":""}</div>`;last=p.group}
     const top=p.sw.reduce((a,s)=>lum(s.hex)>lum(a.hex)?s:a);
     html+=`<button class="item" data-id="${p.id}" aria-current="${p.id===cur}">
       <div class="row1"><div class="bar">${p.sw.map(s=>`<i style="background:${s.hex}"></i>`).join("")}</div>
@@ -577,6 +600,7 @@ const SEC_LABEL={1:n=>`${n} families`,2:n=>`${n} groups`,3:n=>`${n} groups`,4:n=
 /* openSec: which top section is open ("c" = Colours, 3 Type, 4 Layout, 5 Elevation, 0 none); openSub: 1 Primitives, 2 Semantic, 0 none */
 let openSub=1;
 function renderList(){
+  $("sortHome").appendChild($("sortwrap"));   /* keep the sort button alive across re-renders */
   const q=$("q").value.trim().toLowerCase();
   if(openSec===null){openSec=filter<=2?"c":filter;if(filter<=2)openSub=filter}
   const head=(key,name,label,open,sub)=>`<button class="grp${sub?" sub":""}" data-k="${key}" aria-expanded="${open}">${chev}<span>${name}</span><span class="gc">${label}</span></button>`;
@@ -589,8 +613,8 @@ function renderList(){
       html+=`<div class="gbody">`;
       if(q&&!(openSub===1?pN:sN))openSub=pN?1:2;
       if(!openSub)openSub=1;
-      html+=`<div class="segs ctabs" role="tablist" aria-label="Colour sets">${[[1,"Primitives",pN],[2,"Semantic",sN]].map(([k,name,n])=>
-        `<button class="seg" role="tab" data-s="${k}" aria-selected="${openSub===k}">${name}${q?` <span class="sn">${n}</span>`:""}</button>`).join("")}</div>`;
+      html+=`<div class="ctrow"><div class="segs ctabs" role="tablist" aria-label="Colour sets">${[[1,"Primitives",pN],[2,"Semantic",sN]].map(([k,name,n])=>
+        `<button class="seg" role="tab" data-s="${k}" aria-selected="${openSub===k}">${name}${q?` <span class="sn">${n}</span>`:""}</button>`).join("")}</div><span id="sortSlot"></span></div>`;
       html+=`<div class="gbody sub" role="tabpanel">${openSub===1?pB:sB}</div>`;
       html+=`</div>`;
     }
@@ -601,6 +625,7 @@ function renderList(){
       html+=`<button class="grp grp-link" data-k="4" aria-current="${on}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="4"/></svg><span>${name}</span><span class="gc">Playground →</span></button>`;return}
     const o=q?true:openSec===k;html+=head(k,name,SEC_LABEL[k](n),o,false);if(o)html+=`<div class="gbody">${body}</div>`});
   $("list").innerHTML=html||`<p style="padding:20px;color:var(--ink-3)">Nothing matches “${q}”.</p>`;
+  {const slot=$("sortSlot");if(slot)slot.replaceWith($("sortwrap"))}
   $("list").querySelectorAll(".grp").forEach(b=>b.onclick=()=>{const k=b.dataset.k;
     if(k==="4"){showLayout("lay-play");return}
     {const v=k==="c"?"c":+k;openSec=openSec===v?0:v;justOpened=openSec===v?v:null;if(v==="c"&&openSec==="c"&&!openSub)openSub=1}
@@ -897,7 +922,30 @@ document.querySelectorAll(".seg").forEach(b=>b.onclick=()=>{const nf=+b.dataset.
   const inTab=nf===4?LG.some(g=>g.id===cur):nf===3?TG.some(g=>g.id===cur):pals.some(p=>p.id===cur&&FIL[nf][1](p));
   if(inTab){filter=nf;syncTabs();renderList();return}
   if(nf===4)showLayout(LG[0].id);else if(nf===3)showType(TG[0].id);else show(pals.find(FIL[nf][1]).id)});
-$("sortBtn").onclick=()=>{sorted=!sorted;toast(sorted?"Sorted by contrast":"Grouped by collection");renderList()};
+/* ---------- sort menu ---------- */
+const SORTS=[["default","Collection order","As set up in Figma"],["name","Name","A to Z"],["hue","Hue","Around the colour wheel, neutrals last"],["contrast","Max contrast","Highest first"],["aa","AA text pairs","Most passing pairs first"]];
+const SORTFN={name:(a,b)=>a.name.localeCompare(b.name),
+  hue:(a,b)=>((a.C<.02)-(b.C<.02))||(a.hue-b.hue),
+  contrast:(a,b)=>b.best_c-a.best_c,
+  aa:(a,b)=>((b.tot?b.pairs/b.tot:0)-(a.tot?a.pairs/a.tot:0))||(b.best_c-a.best_c)};
+function renderSortMenu(){
+  $("smenu").innerHTML=`<div class="sm-h">Sort palettes by</div>`+SORTS.map(([k,n,d])=>`<button class="sm-i" role="menuitemradio" data-s="${k}" aria-checked="${k===sortMode}"><span><b>${n}</b><small>${d}</small></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></button>`).join("")+`<p class="sm-note">Applies to Primitives and Semantic.</p>`;
+  $("smenu").querySelectorAll(".sm-i").forEach(b=>b.onclick=()=>{sortMode=b.dataset.s;closeSort(true);
+    $("sortBtn").classList.toggle("on",sortMode!=="default");$("sortBtn").setAttribute("aria-label",sortMode==="default"?"Sort palettes":`Sort palettes, sorted by ${SORTS.find(s=>s[0]===sortMode)[1]}`);
+    if(openSec!=="c"){openSec="c";if(!openSub)openSub=1}justOpened="c";renderList()});
+}
+function openSort(){renderSortMenu();const m=$("smenu"),r=$("sortBtn").getBoundingClientRect();m.hidden=false;
+  m.style.top=(r.bottom+8)+"px";m.style.left=Math.max(8,Math.min(r.right-m.offsetWidth,innerWidth-m.offsetWidth-8))+"px";$("sortBtn").setAttribute("aria-expanded","true");
+  ($("smenu").querySelector('.sm-i[aria-checked="true"]')||$("smenu").querySelector(".sm-i")).focus()}
+function closeSort(focusBtn){if($("smenu").hidden)return;$("smenu").hidden=true;$("sortBtn").setAttribute("aria-expanded","false");if(focusBtn)$("sortBtn").focus()}
+$("sortBtn").onclick=e=>{e.stopPropagation();$("smenu").hidden?openSort():closeSort()};
+$("smenu").addEventListener("click",e=>e.stopPropagation());
+document.addEventListener("click",()=>closeSort());
+addEventListener("resize",()=>closeSort());addEventListener("scroll",()=>closeSort(),{passive:true});$("list").addEventListener("scroll",()=>closeSort(),{passive:true});
+$("smenu").addEventListener("keydown",e=>{const items=[...$("smenu").querySelectorAll(".sm-i")],i=items.indexOf(document.activeElement);
+  if(e.key==="ArrowDown"){e.preventDefault();items[(i+1)%items.length].focus()}
+  else if(e.key==="ArrowUp"){e.preventDefault();items[(i-1+items.length)%items.length].focus()}
+  else if(e.key==="Escape"){e.preventDefault();closeSort(true)}});
 function setTheme(t){const R=document.documentElement;R.classList.add("no-tx");R.dataset.theme=t;requestAnimationFrame(()=>requestAnimationFrame(()=>R.classList.remove("no-tx")));$("tLight").setAttribute("aria-pressed",t==="light");$("tDark").setAttribute("aria-pressed",t==="dark");try{localStorage.setItem("dop-theme",t)}catch(e){}}
 $("tLight").onclick=()=>setTheme("light");$("tDark").onclick=()=>setTheme("dark");
 let th=null;try{th=localStorage.getItem("dop-theme")}catch(e){}
