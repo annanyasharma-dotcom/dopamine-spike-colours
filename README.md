@@ -7,6 +7,7 @@ The site opens on a landing page. **Explore colours** opens a gallery of every p
 - **Primitives:** 13 colour families (flame coral, cool neutral, vital red and the rest), each step with HEX, RGB, CMYK, HSL and its token name.
 - **Semantic tokens:** grouped as in the Figma Semantic collection (Background, Text, Icon, Border). Each token shows the primitive it maps to.
 - **Utility:** Health status (`HIH/*`) and business category colours.
+- **Type:** the 39 text styles in Figtree (Display, Headings, Label, Body, Caption & Footnote), each shown as a live specimen with copyable CSS, plus the six elevation shadows.
 
 Every palette shows its contrast stats (max contrast, AA text pairs, colour-blind safe pairs) and a contrast grid. You can copy any value, or a palette as CSS or JSON.
 
@@ -25,5 +26,5 @@ To publish with GitHub Pages: **Settings → Pages → Deploy from branch → `m
 | Path | What it is |
 | --- | --- |
 | `index.html` | The site: landing page and gallery |
-| `tokens/` | Figma variable exports the site is built from (Primitives, Semantic, Utility, Extra) |
+| `tokens/` | Figma variable exports (Primitives, Semantic, Utility, Extra) and `typography.css` with the text-size and effect styles |
 | `assets/` | Dopamine spike logo, dark-ink and white-ink versions |
