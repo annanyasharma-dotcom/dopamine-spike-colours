@@ -491,8 +491,7 @@ function renderList(){
   $("list").innerHTML=html||`<p style="padding:20px;color:var(--ink-3)">Nothing matches “${q}”.</p>`;
   $("list").querySelectorAll(".grp").forEach(b=>b.onclick=()=>{const k=b.dataset.k;
     {const v=k==="c"?"c":+k;openSec=openSec===v?0:v;if(v==="c"&&openSec==="c"&&!openSub)openSub=1}
-    /* nothing open falls back to Colours › Primitives */
-    if(openSec===0||(openSec==="c"&&!openSub)){openSec="c";openSub=1}
+    if(openSec==="c"&&!openSub)openSub=1;
     renderList();const el=$("list").querySelector(`.grp[data-k="${k}"]`);el&&el.scrollIntoView({block:"nearest"})});
   $("list").querySelectorAll(".ctabs .seg").forEach(b=>b.onclick=()=>{openSub=+b.dataset.s;renderList()});
   $("list").querySelectorAll(".item").forEach(b=>b.onclick=()=>{const id=b.dataset.id;
