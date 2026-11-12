@@ -209,6 +209,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .main.pop{animation:pop .55s cubic-bezier(.2,.9,.3,1.15) both}
 .main.pop .col{animation:colIn .5s cubic-bezier(.2,.9,.3,1.1) both;animation-delay:calc(.08s + var(--ci,0) * 50ms)}
 @keyframes pop{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
+.rise{animation:colIn .5s cubic-bezier(.2,.9,.3,1.1) both;animation-delay:calc(.04s + var(--ci,0) * 45ms)}
 @keyframes colIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .back{all:unset;cursor:pointer;font-size:14px;font-weight:500;color:var(--ink-2);display:flex;align-items:center;gap:6px;padding:4px 2px}
 .back:hover{color:var(--ink)}
@@ -440,6 +441,10 @@ function textFor(s){
 }
 const syncTabs=()=>{if(filter<=2){openSec="c";openSub=filter}else openSec=filter};
 const FIL=[["All palettes",()=>true],["Primitives",p=>p.kind==="Primitive"],["Semantic",p=>p.kind!=="Primitive"],["Type",()=>false],["Layout",()=>false],["Elevation",()=>false]];
+/* staggered rise, the same motion the colour columns use */
+const RM=matchMedia("(prefers-reduced-motion: reduce)");
+function rise(sel){if(RM.matches)return;document.querySelectorAll(sel).forEach((el,i)=>{el.style.setProperty("--ci",Math.min(i,14));el.classList.remove("rise");void el.offsetWidth;el.classList.add("rise")})}
+let justOpened=null;
 let openSec=null;
 const SECS=[{f:1,name:"Primitives"},{f:2,name:"Semantic"},{f:3,name:"Type"},{f:4,name:"Layout"},{f:5,name:"Elevation"}];
 const chev='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>';
@@ -491,10 +496,13 @@ function renderList(){
     const o=q?true:openSec===k;html+=head(k,name,SEC_LABEL[k](n),o,false);if(o)html+=`<div class="gbody">${body}</div>`});
   $("list").innerHTML=html||`<p style="padding:20px;color:var(--ink-3)">Nothing matches “${q}”.</p>`;
   $("list").querySelectorAll(".grp").forEach(b=>b.onclick=()=>{const k=b.dataset.k;
-    {const v=k==="c"?"c":+k;openSec=openSec===v?0:v;if(v==="c"&&openSec==="c"&&!openSub)openSub=1}
+    {const v=k==="c"?"c":+k;openSec=openSec===v?0:v;justOpened=openSec===v?v:null;if(v==="c"&&openSec==="c"&&!openSub)openSub=1}
     if(openSec==="c"&&!openSub)openSub=1;
     renderList();const el=$("list").querySelector(`.grp[data-k="${k}"]`);el&&el.scrollIntoView({block:"nearest"})});
-  $("list").querySelectorAll(".ctabs .seg").forEach(b=>b.onclick=()=>{openSub=+b.dataset.s;renderList()});
+  $("list").querySelectorAll(".ctabs .seg").forEach(b=>b.onclick=()=>{openSub=+b.dataset.s;justOpened="c";renderList()});
+  if(justOpened!==null){const g=$("list").querySelector(`.grp[data-k="${justOpened}"]`);justOpened=null;
+    if(g&&g.nextElementSibling&&g.nextElementSibling.classList.contains("gbody")){const items=g.nextElementSibling.querySelectorAll(".item");
+      if(!RM.matches)items.forEach((el,i)=>{el.style.setProperty("--ci",Math.min(i,14));el.classList.add("rise")})}}
   $("list").querySelectorAll(".item").forEach(b=>b.onclick=()=>{const id=b.dataset.id;
     (id.startsWith("type-")?showType:id.startsWith("lay-")?showLayout:show)(id)});
 }
@@ -535,6 +543,7 @@ function show(id){
    <div><h3>Reading</h3><dl>${row("Character",p.character)}${row("Name From",p.from)}</dl></div>`;
   $("ccPill").onclick=toggleMatrix;
   renderMatrix(p);
+  rise("#cols .col");
 }
 
 /* ---------- typography ---------- */
@@ -590,6 +599,7 @@ function showType(id){
     $("stats").innerHTML=`<div><h3>Depth</h3><dl>${row("Levels",SHADOWS.length)}${row("Max Offset","8px")}${row("Max Blur","10px")}${row("Opacity","3–7%")}</dl></div>
       <div><h3>Usage</h3><dl>${row("Resting Cards","xs · s")}${row("Raised Cards","md · lg")}${row("Sheets & Menus","xl · xxl")}</dl></div>
       <div><h3>Reading</h3><dl>${row("Character",g.character)}${row("Name From","Effect styles")}</dl></div>`;
+    rise("#typeView .ecard");
     return;
   }
   const sizes=[...new Set(g.items.map(t=>t.px))].sort((a,b)=>b-a),ws=[...new Set(g.items.map(t=>t.weightName).filter(Boolean))];
@@ -604,6 +614,7 @@ function showType(id){
   $("stats").innerHTML=`<div><h3>Scale</h3><dl>${row("Sizes",sizes.map(s=>s+"px").join(" · "))}${row("Step Ratio",ratio)}${row("Weights",ws.length?ws.map(w=>WT[w]).join(" · "):"Not set")}${row("Styles",g.items.length)}</dl></div>
     <div><h3>Accessibility</h3><dl>${row("Smallest Size",sizes[sizes.length-1]+"px")}${row("Below 12px",small+"/"+g.items.length)}${row("WCAG Large Text",large+"/"+g.items.length)}</dl></div>
     <div><h3>Reading</h3><dl>${row("Character",g.character)}${row("Family",FAMILY)}${row("Name From","Text-size styles")}</dl></div>`;
+  rise("#typeView .trow");
 }
 
 /* ---------- layout (Extra collection) ---------- */
@@ -668,6 +679,7 @@ function showLayout(id){
       <div><h3>Reading</h3><dl>${row("Character",g.character)}${row("Figma Scope",g.scope)}${row("Name From","Extra · stroke")}</dl></div>`;
   }
   $("desc").textContent=`${g.best} ${rhythm}`;
+  rise("#typeView .ltile, #typeView .trow");
 }
 function renderMatrix(p){
   const sw=p.sw.filter((s,i)=>p.sw.findIndex(t=>t.hex===s.hex)===i);
