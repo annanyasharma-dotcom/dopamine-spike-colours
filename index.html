@@ -218,7 +218,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 
 /* ---------- type ---------- */
 .stage[data-mode="type"] #cols,.stage[data-mode="type"] .actions,.stage[data-mode="type"] #matrix{display:none}
-.stage:not([data-mode="type"]) #typeView{display:none}
+.stage:not([data-mode="type"]):not([data-mode="play"]) #typeView{display:none}
 .typeview{display:flex;flex-direction:column;gap:0;font-family:"Figtree",system-ui,sans-serif}
 .tv-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-bottom:14px}
 .tv-bar label{flex:1;min-width:220px;display:flex;align-items:center;gap:10px;background:var(--field);border-radius:999px;padding:10px 16px}
@@ -261,6 +261,73 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .gapviz i{width:28px;height:28px;border-radius:6px;background:#FF5443;flex:none}
 .gapviz u{display:block;height:28px;background:repeating-linear-gradient(45deg,color-mix(in srgb,#FF5443 35%,transparent) 0 3px,transparent 3px 6px);flex:none}
 .lprev{display:flex;align-items:center;gap:6px;height:32px;flex:1;min-width:0;overflow:hidden}
+
+/* ---------- playgrounds ---------- */
+.pg{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:18px;padding:16px;border:1px solid var(--line);border-radius:20px;margin-bottom:22px;background:var(--panel)}
+@media (max-width:860px){.pg{grid-template-columns:minmax(0,1fr)}}
+.pg-h{grid-column:1/-1;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.pg-h b{font-size:17px;font-weight:600}.pg-h span{font-size:13px;color:var(--ink-3)}
+.pg-stage{border-radius:14px;background:var(--panel-2);display:grid;place-items:center;padding:clamp(20px,4vw,40px);min-height:280px}
+.pg-stage.light{background:#F7F7F7}
+.pg-card{width:max-content;min-width:min(320px,100%);max-width:none;box-sizing:border-box;background:var(--panel);border-style:solid;border-color:var(--line-2);display:flex;flex-direction:column;padding:16px;
+  transition:border-radius .35s cubic-bezier(.2,.9,.3,1.2),border-width .25s ease,gap .35s cubic-bezier(.2,.9,.3,1.2),box-shadow .35s ease,transform .35s ease}
+.pg-stage.light .pg-card{background:#FFFFFF;border-color:transparent;color:#0D0D0D}
+.pg-row{display:flex;flex-wrap:wrap;align-items:center;transition:gap .35s cubic-bezier(.2,.9,.3,1.2)}
+.pg-chip{font-size:12px;font-weight:600;padding:6px 10px;border-style:solid;border-color:var(--line-2);color:var(--ink-2);transition:border-radius .35s ease,border-width .25s ease}
+.pg-thumb{width:52px;height:52px;flex:none;background:#FFE0E3;display:grid;place-items:center;font-size:22px;transition:border-radius .35s ease}
+.pg-thumb::before{content:"";width:22px;height:10px;border-radius:6px;background:linear-gradient(90deg,#FF5443 50%,#FFFFFF 50%);box-shadow:0 0 0 1.5px #C83B30;transform:rotate(-30deg)}
+.pg-txt b{display:block;font-size:15px;font-weight:600;line-height:1.3}.pg-txt small{font-size:12px;color:var(--ink-3)}
+.pg-stage.light .pg-txt small,.pg-stage.light .pg-price s{color:#808080}
+.pg-stage.light .pg-chip{color:#525252;border-color:#C4C4C4}
+.pg-price{font-size:15px;font-weight:700}.pg-price s{font-weight:400;color:var(--ink-3);font-size:12px;margin-left:6px}
+.pg-btn{all:unset;text-align:center;background:#FF5443;color:#FFFFFF;font-weight:600;font-size:14px;padding:11px 14px;transition:border-radius .35s ease}
+.pg-ctrls{display:flex;flex-direction:column;gap:14px;min-width:0}
+.pg-ctrl{display:flex;flex-direction:column;gap:8px}
+.pg-ctrl label{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);display:flex;justify-content:space-between}
+.pg-ctrl label em{font-style:normal;letter-spacing:0;text-transform:none;color:var(--ink);font-variant-numeric:tabular-nums}
+.pg-opts{display:flex;flex-wrap:wrap;gap:6px}
+.pg-opt{all:unset;cursor:pointer;font-size:13px;font-weight:500;padding:5px 11px;border-radius:999px;border:1px solid var(--line-2);color:var(--ink-2);font-variant-numeric:tabular-nums}
+.pg-opt:hover{color:var(--ink);border-color:var(--ink-3)}
+.pg-opt[aria-pressed="true"]{background:var(--btn);color:var(--btn-ink);border-color:var(--btn)}
+.pg-opt:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.pg-ctrl.hot label{color:var(--ink)}
+.pg-code{position:relative;margin:0;font:500 12.5px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--field);border-radius:12px;padding:12px 44px 12px 14px;overflow-x:auto;color:var(--ink-2);white-space:pre}
+.pg-code .tcopy{position:absolute;right:8px;top:8px;width:30px;height:30px}
+.pg-toggle{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink-2);cursor:pointer}
+.pg-toggle input{width:18px;height:18px;accent-color:#FF5443}
+@media (prefers-reduced-motion:reduce){.pg-card,.pg-row,.pg-chip,.pg-thumb,.pg-btn{transition:none}}
+
+.ptabs{display:flex;gap:6px;flex-wrap:wrap;padding:4px;background:var(--field);border-radius:999px;width:max-content;max-width:100%;margin-bottom:20px}
+.ptab{all:unset;cursor:pointer;font-size:14px;font-weight:500;padding:8px 16px;border-radius:999px;color:var(--ink-2);white-space:nowrap}
+.ptab:hover{color:var(--ink)}
+.ptab[aria-selected="true"]{background:var(--btn);color:var(--btn-ink);font-weight:600}
+.ptab:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+@media (max-width:640px){.ptabs{border-radius:16px;width:auto}}
+
+/* playground fits one screen: no info block, compact controls */
+.stage[data-mode="play"] #cols,.stage[data-mode="play"] .actions,.stage[data-mode="play"] #matrix,.stage[data-mode="play"] .titlebar,.stage[data-mode="play"] .stats{display:none}
+.stage[data-mode="play"]{gap:12px}
+.stage[data-mode="play"] .ptabs{margin-bottom:12px}
+.stage[data-mode="play"] .pg{margin-bottom:0;gap:14px;padding:14px}
+.stage[data-mode="play"] .pg-h{display:none}
+@media (min-width:861px){.stage[data-mode="play"] .pg{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr)}}
+.stage[data-mode="play"] .pg-ctrls{gap:10px}
+.stage[data-mode="play"] .pg-ctrl{gap:6px}
+.stage[data-mode="play"] .pg-opt{padding:4px 10px;font-size:12.5px}
+.stage[data-mode="play"] .pg-code{font-size:12px;line-height:1.5;padding:10px 44px 10px 12px}
+@media (min-width:861px){
+  .stage[data-mode="play"] .pg{min-height:max(430px,calc(100dvh - 266px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)));grid-template-rows:auto}
+  .stage[data-mode="play"] .pg-stage{min-height:100%;height:auto}
+  .stage[data-mode="play"] .pg-ctrls{overflow:auto;min-height:0}
+  .stage[data-mode="play"] .pg-code{flex:1 1 auto;min-height:90px;overflow:auto}
+  body:has(.stage[data-mode="play"]){padding-bottom:16px}
+}
+.pg-chips{flex-wrap:nowrap}
+.pg-chip{white-space:nowrap;flex:none}
+.pg-stage{overflow-x:auto;min-width:0}
+/* tiles and cards reset their styles with all:unset, so the rise needs the extra weight */
+.ltile.rise,.ecard.rise,.trow.rise{animation:colIn .5s cubic-bezier(.2,.9,.3,1.1) both;animation-delay:calc(.04s + var(--ci,0) * 45ms)}
+@media (prefers-reduced-motion:reduce){.ltile.rise,.ecard.rise,.trow.rise{animation:none}}
 </style>
 </head>
 <body>
@@ -467,10 +534,15 @@ const countItems=h=>(h.match(/class="item"/g)||[]).length;
 function secBody(f,q){
   if(f===1||f===2)return colourItems(f,q);
   if(f===3){const h=stripSec(renderTypeList(q,"text"));return [h,countItems(h)]}
-  if(f===4){const h=stripSec(renderLayoutList(q));return [h,countItems(h)]}
+  if(f===4){const kw="playground layout elevation corner radius stroke width gap spacing shadow "+Object.values(LAY).flat().map(x=>x[0]).join(" ")+" "+SNAMES.join(" ");
+    if(q&&!kw.includes(q))return ["",0];
+    const on=cur==="lay-play"||cur.startsWith("lay-")||cur==="type-elevation";
+    const h=`<button class="item" data-id="lay-play" aria-current="${on}"><div class="row1"><span class="lprev">${[2,6,12,24].map((r,i)=>`<i style="width:24px;height:24px;flex:none;background:#fff;border:1px solid #DBDBDB;border-radius:${r}px;box-shadow:${SHADOWS[i+1][1]}"></i>`).join("")}</span><span class="mx" style="background:var(--panel-2);color:var(--ink)">Live</span></div>
+      <div class="row2"><span class="n"><strong>Playground</strong></span></div></button>`;
+    return [h,1]}
   const h=stripSec(renderTypeList(q,"elev"));return [h,countItems(h)];
 }
-const SEC_LABEL={1:n=>`${n} families`,2:n=>`${n} groups`,3:n=>`${n} groups`,4:n=>`${n} groups`,5:n=>`6 levels`};
+const SEC_LABEL={1:n=>`${n} families`,2:n=>`${n} groups`,3:n=>`${n} groups`,4:n=>`4 properties`,5:n=>`6 levels`};
 /* openSec: which top section is open ("c" = Colours, 3 Type, 4 Layout, 5 Elevation, 0 none); openSub: 1 Primitives, 2 Semantic, 0 none */
 let openSub=1;
 function renderList(){
@@ -492,7 +564,7 @@ function renderList(){
       html+=`</div>`;
     }
   }
-  [[3,"Type"],[4,"Layout"],[5,"Elevation"]].forEach(([k,name])=>{const [body,n]=secBody(k,q);if(q&&!n)return;
+  [[3,"Type"],[4,"Layout & Elevation"]].forEach(([k,name])=>{const [body,n]=secBody(k,q);if(q&&!n)return;
     const o=q?true:openSec===k;html+=head(k,name,SEC_LABEL[k](n),o,false);if(o)html+=`<div class="gbody">${body}</div>`});
   $("list").innerHTML=html||`<p style="padding:20px;color:var(--ink-3)">Nothing matches “${q}”.</p>`;
   $("list").querySelectorAll(".grp").forEach(b=>b.onclick=()=>{const k=b.dataset.k;
@@ -574,13 +646,14 @@ function renderTypeList(q,which){
 function cssFor(t){return `font-family: "${FAMILY}", sans-serif;\nfont-size: ${t.px}px; /* var(--${t.tok}) */\nfont-weight: ${WT[t.weightName]||400};`}
 function showType(id){
   cur=id;const g=TG.find(x=>x.id===id);try{localStorage.setItem("dop-pal",id)}catch(e){}
-  filter=g.id==="type-elevation"?5:3;syncTabs();renderList();
+  filter=g.id==="type-elevation"?4:3;syncTabs();renderList();
   document.querySelector(".stage").dataset.mode="type";
   const sm=t=>tSample||g.sample;
   if(g.id==="type-elevation"){
     $("typeView").innerHTML=`<div class="elev">${SHADOWS.map(([k,v])=>`<button class="ecard" data-v="box-shadow: ${v};" style="box-shadow:${v}" title="Copy --${k}"><b>${k}</b><span>${v.replace(/\),\s*/g,"),<br>")}</span></button>`).join("")}</div>
       <p class="ecap">Shown on cool-neutral/25 with white cards in both themes, since these shadows are tuned for light surfaces. Tap a card to copy its box-shadow.</p>`;
     $("typeView").querySelectorAll(".ecard").forEach(b=>b.onclick=()=>copy(b.dataset.v,"Copied "+b.title.slice(5)));
+    $("typeView").insertAdjacentHTML("afterbegin",propTabs("type-elevation"));bindPropTabs();
   }else{
     $("typeView").innerHTML=`<div class="tv-bar"><label><input id="tSample" placeholder="${g.sample}" value="${tSample.replace(/"/g,"&quot;")}" aria-label="Sample text"><span>Try your own text</span></label></div>
       <div>${g.items.map((t,i)=>`<div class="trow"><div class="tmeta"><b>${t.tok}</b><span>${t.px}px · ${t.weightName?T(t.weightName)+" "+WT[t.weightName]:"Weight not set"}</span></div>
@@ -617,6 +690,85 @@ function showType(id){
   rise("#typeView .trow");
 }
 
+
+/* ---------- playground (shared by Layout & Elevation) ---------- */
+const PG={radius:"lg",stroke:"regular",gap:"12",shadow:"md",lift:true};
+const layVal=(g,k)=>LAY[g].find(x=>x[0]===k)[1];
+const SNAMES=SHADOWS.map(x=>x[0]);
+const shadowOf=k=>k==="none"?"none":SHADOWS.find(x=>x[0]===k)[1];
+const nextShadow=k=>SNAMES[Math.min((k==="none"?-1:SNAMES.indexOf(k))+1,SNAMES.length-1)];
+const optRow=(key,list,cur)=>`<div class="pg-opts" role="group">${list.map(k=>`<button class="pg-opt" data-pk="${key}" data-v="${k}" aria-pressed="${k===cur}">${k}</button>`).join("")}</div>`;
+function productCard(){return `<div class="pg-card" id="pgCard">
+  <div class="pg-row" data-gap><span class="pg-thumb" data-rad></span><span class="pg-txt"><b>Paracetamol 650mg</b><small>Strip of 15 tablets</small></span></div>
+  <div class="pg-row pg-chips" data-gap><span class="pg-chip" data-rad data-str>Fever</span><span class="pg-chip" data-rad data-str>Pain relief</span><span class="pg-chip" data-rad data-str>Headache</span></div>
+  <div class="pg-row" data-gap><span class="pg-price">₹30.40<s>₹34.00</s></span></div>
+  <span class="pg-btn" data-rad>Add to cart</span></div>`}
+function sharedPG(focus){
+  const ctrl=(key,label,list,id)=>`<div class="pg-ctrl${focus===key?" hot":""}"><label>${label} <em id="${id}"></em></label>${optRow(key,list,PG[key])}</div>`;
+  return `<section class="pg" id="pg" aria-label="Layout and elevation playground">
+    <div class="pg-h"><b>Playground</b><span>One card, every shape, spacing and depth token. Pick values, hover the card, then copy the CSS.</span></div>
+    <div class="pg-stage light">${productCard()}</div>
+    <div class="pg-ctrls">
+      ${ctrl("radius","Radius",LAY.radius.map(x=>x[0]),"pgRv")}
+      ${ctrl("stroke","Stroke",LAY.stroke.map(x=>x[0]),"pgSv")}
+      ${ctrl("gap","Gap",LAY.gap.map(x=>x[0]),"pgGv")}
+      ${ctrl("shadow","Shadow",["none",...SNAMES],"pgEv")}
+      <label class="pg-toggle"><input type="checkbox" id="pgLift" ${PG.lift?"checked":""}> Lift one shadow level on hover</label>
+      <pre class="pg-code" id="pgCode"></pre>
+    </div></section>`;
+}
+function applyPG(hover){
+  const card=$("pgCard");if(!card)return;
+  const rv=layVal("radius",PG.radius),sv=layVal("stroke",PG.stroke),gv=layVal("gap",PG.gap);
+  const k=hover&&PG.lift?nextShadow(PG.shadow):PG.shadow;
+  card.style.borderRadius=Math.min(rv,40)+"px";card.style.borderWidth=sv+"px";card.style.borderColor=sv?"#DBDBDB":"transparent";card.style.gap=gv+"px";
+  card.style.boxShadow=shadowOf(k);card.style.transform=hover&&PG.lift?"translateY(-3px)":"none";
+  card.querySelectorAll("[data-gap]").forEach(e=>e.style.gap=gv+"px");
+  card.querySelectorAll("[data-rad]").forEach(e=>e.style.borderRadius=Math.min(rv,e.classList.contains("pg-thumb")?26:999)+"px");
+  card.querySelectorAll("[data-str]").forEach(e=>e.style.borderWidth=Math.max(sv,.5)+"px");
+  $("pgRv").textContent=rv+"px";$("pgSv").textContent=sv+"px";$("pgGv").textContent=gv+"px";
+  fitCard();
+  $("pgEv").textContent=hover&&PG.lift&&k!==PG.shadow?`${PG.shadow} → ${k}`:PG.shadow;
+  if(hover)return;
+  const css=`.card {\n  border-radius: var(--radius-${PG.radius}); /* ${rv}px */\n  border-width: var(--stroke-${PG.stroke}); /* ${sv}px */\n  gap: var(--gap-${PG.gap}); /* ${gv}px */\n  box-shadow: ${PG.shadow==="none"?"none":`var(--${PG.shadow})`};`+"\n}"+(PG.lift?`\n.card:hover { box-shadow: var(--${nextShadow(PG.shadow)}); transform: translateY(-3px); }`:"");
+  $("pgCode").innerHTML=`${css}<button class="tcopy" id="pgCopy" title="Copy CSS" aria-label="Copy CSS">${copyIc}</button>`;
+  $("pgCopy").onclick=()=>copy(css,"Copied playground CSS");
+}
+/* on narrow screens, scale the card down so it always sits inside the canvas */
+function fitCard(){const c=$("pgCard"),s=c&&c.parentElement;if(!c)return;c.style.zoom=1;
+  const cs=getComputedStyle(s),avail=s.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+  const z=Math.min(1,avail/c.offsetWidth);c.style.zoom=z<1?z.toFixed(3):""}
+addEventListener("resize",()=>fitCard());
+function bindPG(){
+  const pg=$("pg");if(!pg)return;
+  pg.querySelectorAll(".pg-opt").forEach(b=>b.onclick=()=>{PG[b.dataset.pk]=b.dataset.v;
+    pg.querySelectorAll(`.pg-opt[data-pk="${b.dataset.pk}"]`).forEach(x=>x.setAttribute("aria-pressed",x===b));applyPG(false)});
+  const c=$("pgCard");c.addEventListener("mouseenter",()=>applyPG(true));c.addEventListener("mouseleave",()=>applyPG(false));
+  $("pgLift").onchange=e=>{PG.lift=e.target.checked;applyPG(false)};applyPG(false);
+}
+
+
+/* ---------- Layout & Elevation: playground page with property tabs ---------- */
+const PTABS=[["lay-play","Playground"],["lay-radius","Corner Radius"],["lay-stroke","Stroke Width"],["lay-gap","Gap"],["type-elevation","Elevation"]];
+const propTabs=active=>`<div class="ptabs" role="tablist" aria-label="Layout and elevation">${PTABS.map(([id,n])=>`<button class="ptab" role="tab" data-id="${id}" aria-selected="${id===active}">${n}</button>`).join("")}</div>`;
+function bindPropTabs(){document.querySelectorAll("#typeView .ptab").forEach(b=>b.onclick=()=>{const id=b.dataset.id;
+  (id==="type-elevation"?showType:showLayout)(id)})}
+function showPlayground(){
+  cur="lay-play";try{localStorage.setItem("dop-pal",cur)}catch(e){}
+  filter=4;syncTabs();renderList();
+  document.querySelector(".stage").dataset.mode="play";
+  $("typeView").innerHTML=propTabs("lay-play")+sharedPG(null);bindPropTabs();bindPG();
+  $("title").textContent="Playground";
+  $("tags").innerHTML=["Live","Shape · Space · Depth"].map(t=>`<span>${t}</span>`).join("");
+  $("desc").textContent="Try radius, stroke, gap and shadow tokens together on a real card, then copy the CSS. Open a tab above to read about each property and see its full scale.";
+  const orb=$("orb");orb.classList.add("type");orb.style.fontWeight="";orb.style.background="#F7F7F7";
+  orb.innerHTML=`<span style="width:44%;aspect-ratio:1.3;border-radius:12px;background:#fff;border:1px solid #DBDBDB;box-shadow:${SHADOWS[3][1]}"></span>`;
+  const row=(k,v)=>`<div class="r"><dt>${k}</dt><dd>${v}</dd></div>`;
+  $("stats").innerHTML=`<div><h3>Tokens</h3><dl>${row("Corner Radius",LAY.radius.length+" steps")}${row("Stroke Width",LAY.stroke.length+" steps")}${row("Gap",LAY.gap.length+" steps")}${row("Elevation",SHADOWS.length+" levels")}</dl></div>
+    <div><h3>Output</h3><dl>${row("Format","CSS")}${row("Values","Token variables")}${row("Hover State","Optional lift")}</dl></div>
+    <div><h3>Reading</h3><dl>${row("Character","Hands-on")}${row("Name From","Extra · Effect styles")}</dl></div>`;
+  rise("#typeView .pg");
+}
 /* ---------- layout (Extra collection) ---------- */
 const LAY={"radius": [["none", 0, "CORNER_RADIUS"], ["xxs", 2, "CORNER_RADIUS"], ["xs", 4, "CORNER_RADIUS"], ["s", 6, "CORNER_RADIUS"], ["md", 8, "CORNER_RADIUS"], ["lg", 12, "CORNER_RADIUS"], ["xl", 16, "CORNER_RADIUS"], ["xxl", 24, "CORNER_RADIUS"], ["full", 999, "CORNER_RADIUS"]], "stroke": [["none", 0, "STROKE_FLOAT"], ["thin", 0.5, "STROKE_FLOAT"], ["regular", 1, "STROKE_FLOAT"], ["medium", 1.5, "STROKE_FLOAT"], ["thick", 2, "STROKE_FLOAT"], ["thicker", 3, "STROKE_FLOAT"]], "gap": [["none", 0, "GAP"], ["2", 2, "GAP"], ["4", 4, "GAP"], ["6", 6, "GAP"], ["8", 8, "GAP"], ["10", 10, "GAP"], ["12", 12, "GAP"], ["14", 14, "GAP"], ["16", 16, "GAP"], ["18", 18, "GAP"], ["20", 20, "GAP"], ["24", 24, "GAP"], ["28", 28, "GAP"], ["32", 32, "GAP"], ["36", 36, "GAP"], ["40", 40, "GAP"]]};
 const LG=[
@@ -636,6 +788,7 @@ function renderLayoutList(q){
       <div class="row2"><span class="n"><strong>${g.name}</strong><span class="chipx">${g.items.length} steps</span></span></div></button>`}).join("");
 }
 function showLayout(id){
+  if(id==="lay-play")return showPlayground();
   cur=id;const g=LG.find(x=>x.id===id);try{localStorage.setItem("dop-pal",id)}catch(e){}
   filter=4;syncTabs();renderList();
   document.querySelector(".stage").dataset.mode="type";
@@ -652,6 +805,7 @@ function showLayout(id){
         <button class="tcopy" data-i="${i}" title="Copy ${g.key}-${k}" aria-label="Copy ${g.key}-${k}">${copyIc}</button></div>`}).join("")}</div>`;
     tv.querySelectorAll(".tcopy").forEach(b=>b.onclick=()=>{const it=g.items[+b.dataset.i];copy(lcss(g,it),`Copied ${g.key}-${it[0]}`)});
   }
+  tv.insertAdjacentHTML("afterbegin",propTabs(g.id));bindPropTabs();
   $("title").textContent=g.name;
   const vals=g.items.map(i=>i[1]),fin=vals.filter(v=>v<999),nz=fin.filter(v=>v>0);
   const diffs=nz.slice(1).map((v,i)=>+(v-nz[i]).toFixed(2));
