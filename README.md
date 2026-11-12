@@ -2,7 +2,7 @@
 
 A foundations gallery for **Dopamine**, the Tata 1mg design system, by Annanya Sharma.
 
-The site opens on a landing page. **Explore colours** opens the gallery, whose library has three sections:
+The site opens on a landing page with live tiles for colour, type, layout and elevation. **Explore foundations** (or any tile) opens the gallery, whose library has three sections:
 
 - **Colours › Primitives:** 13 colour families (flame coral, cool neutral, vital red and the rest), each step with HEX, RGB, CMYK, HSL, OKLCH and its token name.
 - **Colours › Semantic:** grouped as in the Figma Semantic collection (Background, Text, Icon, Border). Each token shows the primitive it maps to, and subtle/subtler swatches show the group's base text colour (stepped deeper where it fails AA).
