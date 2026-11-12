@@ -30,8 +30,8 @@ button{font:inherit;color:inherit}
 /* top bar */
 .top{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:12px;padding:8px;border:1px solid color-mix(in srgb,var(--line) 70%,transparent);border-radius:999px;background:color-mix(in srgb,var(--page) 62%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.6);backdrop-filter:blur(18px) saturate(1.6);position:sticky;top:calc(env(safe-area-inset-top,0px) + 10px);z-index:20;box-shadow:0 10px 30px -18px rgba(0,0,0,.45),inset 0 1px 0 color-mix(in srgb,var(--panel) 55%,transparent)}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:21;background:var(--page)}
-.segs{margin:10px 16px 12px;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px;background:var(--field);border-radius:999px}
-.seg{all:unset;cursor:pointer;text-align:center;font-size:14px;font-weight:500;padding:8px 6px;border-radius:999px;color:var(--ink-2)}
+.segs{margin:10px 16px 12px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:4px;background:var(--field);border-radius:999px}
+.seg{all:unset;cursor:pointer;text-align:center;font-size:13px;font-weight:500;padding:8px 2px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-radius:999px;color:var(--ink-2)}
 .seg[aria-selected="true"]{background:var(--btn);color:var(--btn-ink);font-weight:600}
 .seg:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .theme{display:flex;gap:4px;padding:4px;border-radius:999px;background:var(--panel);width:max-content}
@@ -223,6 +223,23 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .orb.type{display:grid;place-items:center;background:var(--panel-2);font-family:"Figtree",system-ui,sans-serif;font-weight:600;font-size:clamp(44px,6vw,84px);letter-spacing:-.04em;color:var(--ink);box-shadow:none}
 .orb.type small{font-size:.32em;font-weight:500;color:var(--ink-3);letter-spacing:0;margin-left:.3em}
 .titem{display:flex;align-items:baseline;gap:10px;height:32px;overflow:hidden;font-family:"Figtree",system-ui,sans-serif;flex:1;min-width:0;color:var(--ink);white-space:nowrap}
+
+/* ---------- layout tokens ---------- */
+.lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.ltile{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:14px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel-2)}
+.ltile:hover{border-color:var(--line-2)}
+.ltile:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.ltile .shape{width:72px;height:72px;background:var(--panel);border:1.5px solid var(--ink)}
+.ltile b{font-size:15px;font-weight:600;color:var(--ink)}
+.ltile span{font-size:13px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.lviz{display:flex;align-items:center;gap:16px;min-width:0}
+.lviz .line{width:min(220px,40vw);background:var(--ink);border-radius:1px}
+.lviz .box{width:40px;height:40px;border-radius:8px;border-style:solid;border-color:var(--ink);box-sizing:border-box;flex:none}
+.lviz .none{font-size:13px;color:var(--ink-3);border:1px dashed var(--line-2);border-radius:8px;padding:6px 10px}
+.gapviz{display:flex;align-items:center}
+.gapviz i{width:28px;height:28px;border-radius:6px;background:#FF5443;flex:none}
+.gapviz u{display:block;height:28px;background:repeating-linear-gradient(45deg,color-mix(in srgb,#FF5443 35%,transparent) 0 3px,transparent 3px 6px);flex:none}
+.lprev{display:flex;align-items:center;gap:6px;height:32px;flex:1;min-width:0;overflow:hidden}
 </style>
 </head>
 <body>
@@ -260,7 +277,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     <aside class="lib">
       <div class="lib-head"><h2>Library</h2><button class="round" id="sortBtn" title="Sort by contrast" aria-label="Sort by contrast">≡▯</button></div>
       <label class="field"><input id="q" placeholder="Search" aria-label="Search palettes"><span class="kbd">⌘ K</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></label>
-      <div class="segs" role="tablist" aria-label="Show palettes"><button class="seg" role="tab" data-f="1" aria-selected="true">Primitives</button><button class="seg" role="tab" data-f="2" aria-selected="false">Semantic</button><button class="seg" role="tab" data-f="3" aria-selected="false">Type</button></div>
+      <div class="segs" role="tablist" aria-label="Show palettes"><button class="seg" role="tab" data-f="1" aria-selected="true">Primitives</button><button class="seg" role="tab" data-f="2" aria-selected="false">Semantic</button><button class="seg" role="tab" data-f="3" aria-selected="false">Type</button><button class="seg" role="tab" data-f="4" aria-selected="false">Layout</button></div>
       <div class="list" id="list"></div>
     </aside>
 
@@ -403,9 +420,11 @@ function textFor(s){
   const [tok,hex]=cands[cands.length-1];return {tok,hex,fb:true,r:cr(s.hex,hex)};
 }
 const syncTabs=()=>document.querySelectorAll(".seg").forEach(x=>x.setAttribute("aria-selected",+x.dataset.f===filter));
-const FIL=[["All palettes",()=>true],["Primitives",p=>p.kind==="Primitive"],["Semantic",p=>p.kind!=="Primitive"],["Type",()=>false]];
+const FIL=[["All palettes",()=>true],["Primitives",p=>p.kind==="Primitive"],["Semantic",p=>p.kind!=="Primitive"],["Type",()=>false],["Layout",()=>false]];
 function renderList(){
   const q=$("q").value.trim().toLowerCase();
+  if(filter===4){$("list").innerHTML=renderLayoutList(q)||`<p style="padding:20px;color:var(--ink-3)">No token matches “${q}”.</p>`;
+    $("list").querySelectorAll(".item").forEach(b=>b.onclick=()=>showLayout(b.dataset.id));return}
   if(filter===3){$("list").innerHTML=renderTypeList(q)||`<p style="padding:20px;color:var(--ink-3)">No style matches “${q}”.</p>`;
     $("list").querySelectorAll(".item").forEach(b=>b.onclick=()=>showType(b.dataset.id));return}
   let ps=pals.filter(FIL[filter][1]).filter(p=>!q||(p.name+" "+(p.path||"")+" "+p.sw.map(s=>s.hex+" "+s.tok+" "+(s.alias||"")).join(" ")).toLowerCase().includes(q));
@@ -529,6 +548,70 @@ function showType(id){
     <div><h3>Accessibility</h3><dl>${row("Smallest Size",sizes[sizes.length-1]+"px")}${row("Below 12px",small+"/"+g.items.length)}${row("WCAG Large Text",large+"/"+g.items.length)}</dl></div>
     <div><h3>Reading</h3><dl>${row("Character",g.character)}${row("Family",FAMILY)}${row("Name From","Text-size styles")}</dl></div>`;
 }
+
+/* ---------- layout (Extra collection) ---------- */
+const LAY={"radius": [["none", 0, "CORNER_RADIUS"], ["xxs", 2, "CORNER_RADIUS"], ["xs", 4, "CORNER_RADIUS"], ["s", 6, "CORNER_RADIUS"], ["md", 8, "CORNER_RADIUS"], ["lg", 12, "CORNER_RADIUS"], ["xl", 16, "CORNER_RADIUS"], ["xxl", 24, "CORNER_RADIUS"], ["full", 999, "CORNER_RADIUS"]], "stroke": [["none", 0, "STROKE_FLOAT"], ["thin", 0.5, "STROKE_FLOAT"], ["regular", 1, "STROKE_FLOAT"], ["medium", 1.5, "STROKE_FLOAT"], ["thick", 2, "STROKE_FLOAT"], ["thicker", 3, "STROKE_FLOAT"]], "gap": [["none", 0, "GAP"], ["2", 2, "GAP"], ["4", 4, "GAP"], ["6", 6, "GAP"], ["8", 8, "GAP"], ["10", 10, "GAP"], ["12", 12, "GAP"], ["14", 14, "GAP"], ["16", 16, "GAP"], ["18", 18, "GAP"], ["20", 20, "GAP"], ["24", 24, "GAP"], ["28", 28, "GAP"], ["32", 32, "GAP"], ["36", 36, "GAP"], ["40", 40, "GAP"]]};
+const LG=[
+ {id:"lay-radius",key:"radius",name:"Corner Radius",scope:"Corner radius",character:"Soft",best:"Best for rounding cards, buttons, inputs and sheets. Use full for pills, avatars and toggles."},
+ {id:"lay-stroke",key:"stroke",name:"Stroke Width",scope:"Stroke width",character:"Precise",best:"Best for borders, dividers, outlines and focus rings."},
+ {id:"lay-gap",key:"gap",name:"Gap",scope:"Gap",character:"Rhythmic",best:"Best for the space between items in rows, stacks and grids."}
+].map(g=>({...g,items:LAY[g.key]}));
+const lcss=(g,[k,v])=>g.key==="radius"?`border-radius: ${v}px; /* --radius-${k} */`:g.key==="stroke"?`border-width: ${v}px; /* --stroke-${k} */`:`gap: ${v}px; /* --gap-${k} */`;
+function renderLayoutList(q){
+  const ls=LG.filter(g=>!q||(g.name+" "+g.key+" "+g.items.map(i=>i[0]+" "+i[1]).join(" ")).toLowerCase().includes(q));
+  return `<div class="sec">Shape & spacing</div>`+ls.map(g=>{
+    const prev=g.key==="radius"?g.items.filter(i=>i[1]>0).slice(0,7).map(i=>`<i style="width:22px;height:22px;border:1.5px solid var(--ink);border-radius:${Math.min(i[1],11)}px;flex:none"></i>`).join("")
+      :g.key==="stroke"?`<span style="display:flex;flex-direction:column;gap:5px;flex:1">${g.items.filter(i=>i[1]>0).map(i=>`<i style="display:block;height:${i[1]}px;background:var(--ink);width:100%"></i>`).join("")}</span>`
+      :g.items.filter(i=>i[1]>0).filter((_,j)=>j%2===0).map(i=>`<i style="width:6px;height:22px;background:var(--ink);border-radius:2px;margin-right:${i[1]/3}px;flex:none"></i>`).join("");
+    const vals=g.items.map(i=>i[1]),mx=Math.max(...vals.filter(v=>v<999));
+    return `<button class="item" data-id="${g.id}" aria-current="${g.id===cur}"><div class="row1"><span class="lprev">${prev}</span><span class="mx" style="background:var(--panel-2);color:var(--ink)">${mx}px</span></div>
+      <div class="row2"><span class="n"><strong>${g.name}</strong><span class="chipx">${g.items.length} steps</span></span></div></button>`}).join("");
+}
+function showLayout(id){
+  cur=id;const g=LG.find(x=>x.id===id);try{localStorage.setItem("dop-pal",id)}catch(e){}
+  filter=4;syncTabs();renderList();
+  document.querySelector(".stage").dataset.mode="type";
+  const tv=$("typeView");
+  if(g.key==="radius"){
+    tv.innerHTML=`<div class="lgrid">${g.items.map((it,i)=>`<button class="ltile" data-i="${i}" title="Copy radius-${it[0]}"><span class="shape" style="border-radius:${it[1]}px"></span><span><b>${it[0]}</b><br>${it[1]}px</span></button>`).join("")}</div>`;
+    tv.querySelectorAll(".ltile").forEach(b=>b.onclick=()=>copy(lcss(g,g.items[+b.dataset.i]),"Copied radius-"+g.items[+b.dataset.i][0]));
+  }else{
+    tv.innerHTML=`<div>${g.items.map((it,i)=>{const [k,v]=it;
+      const viz=v===0?`<span class="none">No ${g.key}</span>`
+        :g.key==="stroke"?`<span class="line" style="height:${v}px"></span><span class="box" style="border-width:${v}px"></span>`
+        :`<span class="gapviz"><i></i><u style="width:${v}px"></u><i></i><u style="width:${v}px"></u><i></i></span>`;
+      return `<div class="trow"><div class="tmeta"><b>${g.key}/${k}</b><span>${v}px</span></div><div class="lviz">${viz}</div>
+        <button class="tcopy" data-i="${i}" title="Copy ${g.key}-${k}" aria-label="Copy ${g.key}-${k}">${copyIc}</button></div>`}).join("")}</div>`;
+    tv.querySelectorAll(".tcopy").forEach(b=>b.onclick=()=>{const it=g.items[+b.dataset.i];copy(lcss(g,it),`Copied ${g.key}-${it[0]}`)});
+  }
+  $("title").textContent=g.name;
+  const vals=g.items.map(i=>i[1]),fin=vals.filter(v=>v<999),nz=fin.filter(v=>v>0);
+  const diffs=nz.slice(1).map((v,i)=>+(v-nz[i]).toFixed(2));
+  const row=(k,v)=>`<div class="r"><dt>${k}</dt><dd>${v}</dd></div>`;
+  const orb=$("orb");orb.classList.add("type");orb.style.background="";orb.style.fontWeight="";
+  orb.innerHTML=g.key==="radius"?`<span style="width:42%;aspect-ratio:1;border:3px solid var(--ink);border-radius:24px 24px 24px 2px"></span>`
+    :g.key==="stroke"?`<span style="display:flex;flex-direction:column;gap:10px;width:50%">${nz.map(v=>`<i style="display:block;height:${v*1.5}px;background:var(--ink)"></i>`).join("")}</span>`
+    :`<span class="gapviz"><i></i><u style="width:16px"></u><i></i><u style="width:28px"></u><i></i></span>`;
+  $("tags").innerHTML=[g.key==="stroke"?"Fine":"Even",`${nz[0]}px base`].map(t=>`<span>${t}</span>`).join("");
+  let rhythm="";
+  if(g.key==="gap"){const cut=nz.findIndex((v,i)=>i>0&&v-nz[i-1]>2);
+    rhythm=`Steps climb by 2px from 2px to ${nz[cut-1]}px, then by 4px up to ${nz[nz.length-1]}px, so tight groupings get fine control and layouts get bigger jumps.`;
+    $("stats").innerHTML=`<div><h3>Scale</h3><dl>${row("Steps",vals.length)}${row("Range",`0–${Math.max(...fin)}px`)}${row("Base Unit",nz[0]+"px")}</dl></div>
+      <div><h3>Rhythm</h3><dl>${row("Fine Steps",`2px · 2–${nz[cut-1]}px`)}${row("Coarse Steps",`4px · ${nz[cut-1]}–${nz[nz.length-1]}px`)}${row("On 4px Grid",nz.filter(v=>v%4===0).length+"/"+nz.length)}</dl></div>
+      <div><h3>Reading</h3><dl>${row("Character",g.character)}${row("Figma Scope",g.scope)}${row("Name From","Extra · gap")}</dl></div>`;
+  }else if(g.key==="radius"){
+    rhythm=`Corners grow from ${nz[0]}px to ${Math.max(...fin)}px, plus full (999px) for fully rounded shapes.`;
+    $("stats").innerHTML=`<div><h3>Scale</h3><dl>${row("Steps",vals.length)}${row("Range",`0–${Math.max(...fin)}px + full`)}${row("Base Unit",nz[0]+"px")}</dl></div>
+      <div><h3>Rhythm</h3><dl>${row("Step Sizes",[...new Set(diffs)].join(" · ")+"px")}${row("On 4px Grid",nz.filter(v=>v%4===0).length+"/"+nz.length)}${row("Pill Value","999px")}</dl></div>
+      <div><h3>Reading</h3><dl>${row("Character",g.character)}${row("Figma Scope",g.scope)}${row("Name From","Extra · radius")}</dl></div>`;
+  }else{
+    rhythm=`Widths run from a ${nz[0]}px hairline to ${Math.max(...fin)}px. The ${nz[0]}px hairline draws as a single device pixel on 2× screens and rounds up to 1px on 1× screens.`;
+    $("stats").innerHTML=`<div><h3>Scale</h3><dl>${row("Steps",vals.length)}${row("Range",`0–${Math.max(...fin)}px`)}${row("Thinnest",nz[0]+"px")}</dl></div>
+      <div><h3>Rhythm</h3><dl>${row("Step Sizes",[...new Set(diffs)].join(" · ")+"px")}${row("Default",'regular · 1px')}${row("Sub-pixel",nz.filter(v=>v<1).length+"/"+nz.length)}</dl></div>
+      <div><h3>Reading</h3><dl>${row("Character",g.character)}${row("Figma Scope",g.scope)}${row("Name From","Extra · stroke")}</dl></div>`;
+  }
+  $("desc").textContent=`${g.best} ${rhythm}`;
+}
 function renderMatrix(p){
   const sw=p.sw.filter((s,i)=>p.sw.findIndex(t=>t.hex===s.hex)===i);
   $("matrix").innerHTML=`<table><tr><th></th>${sw.map(s=>`<th>${s.big}</th>`).join("")}</tr>${sw.map(a=>`<tr><th>${a.big}</th>${sw.map(b=>{
@@ -547,20 +630,22 @@ $("json").onclick=()=>{const p=pals.find(x=>x.id===cur);copy(JSON.stringify(Obje
 $("cc").onclick=toggleMatrix;
 $("copyAll").onclick=()=>{const lines=[];Object.entries(D.fam).forEach(([f,s])=>s.forEach(([k,h])=>lines.push(`  --${f}-${k}: ${h};`)));
   [...D.sem,...D.ut].forEach(x=>lines.push(`  ${cssName(x[0])}: var(${cssName(x[1])}); /* ${x[2]} */`));
+  TXT.forEach(t=>lines.push(`  --${t.tok}: ${t.px}px;`));SHADOWS.forEach(([k,v])=>lines.push(`  --${k}: ${v};`));
+  Object.entries(LAY).forEach(([g,its])=>its.forEach(([k,v])=>lines.push(`  --${g}-${k}: ${v}px;`)));
   copy(`:root {\n${lines.join("\n")}\n}`,`Copied ${lines.length} tokens as CSS`)};
 $("q").oninput=renderList;
 document.addEventListener("keydown",e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"){e.preventDefault();$("q").focus()}});
 document.querySelectorAll(".seg").forEach(b=>b.onclick=()=>{const nf=+b.dataset.f;
-  const inTab=nf===3?TG.some(g=>g.id===cur):pals.some(p=>p.id===cur&&FIL[nf][1](p));
+  const inTab=nf===4?LG.some(g=>g.id===cur):nf===3?TG.some(g=>g.id===cur):pals.some(p=>p.id===cur&&FIL[nf][1](p));
   if(inTab){filter=nf;syncTabs();renderList();return}
-  if(nf===3)showType(TG[0].id);else show(pals.find(FIL[nf][1]).id)});
+  if(nf===4)showLayout(LG[0].id);else if(nf===3)showType(TG[0].id);else show(pals.find(FIL[nf][1]).id)});
 $("sortBtn").onclick=()=>{sorted=!sorted;toast(sorted?"Sorted by contrast":"Grouped by collection");renderList()};
 function setTheme(t){document.documentElement.dataset.theme=t;$("tLight").setAttribute("aria-pressed",t==="light");$("tDark").setAttribute("aria-pressed",t==="dark");try{localStorage.setItem("dop-theme",t)}catch(e){}}
 $("tLight").onclick=()=>setTheme("light");$("tDark").onclick=()=>setTheme("dark");
 let th=null;try{th=localStorage.getItem("dop-theme")}catch(e){}
 setTheme("dark");
-let st=pals[0].id;try{const s=localStorage.getItem("dop-pal");if(s&&(pals.some(p=>p.id===s)||TG.some(g=>g.id===s)))st=s}catch(e){}
-(st.startsWith("type-")?showType:show)(st);
+let st=pals[0].id;try{const s=localStorage.getItem("dop-pal");if(s&&(pals.some(p=>p.id===s)||TG.some(g=>g.id===s)||LG.some(g=>g.id===s)))st=s}catch(e){}
+(st.startsWith("type-")?showType:st.startsWith("lay-")?showLayout:show)(st);
 /* ---------- landing ---------- */
 const HOT=["#FF5443","#FD9A00","#43A46D","#6BBDFF","#1AC7D8","#B4A4FF","#D786E4","#E79ABD","#EBC288","#FA8E63","#FEE685","#BEF9FF"];
 (function(){

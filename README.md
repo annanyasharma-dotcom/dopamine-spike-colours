@@ -8,6 +8,7 @@ The site opens on a landing page. **Explore colours** opens a gallery of every p
 - **Semantic tokens:** grouped as in the Figma Semantic collection (Background, Text, Icon, Border). Each token shows the primitive it maps to.
 - **Utility:** Health status (`HIH/*`) and business category colours.
 - **Type:** the 39 text styles in Figtree (Display, Headings, Label, Body, Caption & Footnote), each shown as a live specimen with copyable CSS, plus the six elevation shadows.
+- **Layout:** corner radius (9 steps), stroke width (6) and gap (16) from the Extra collection, each drawn to scale with copyable CSS.
 
 Every palette shows its contrast stats (max contrast, AA text pairs, colour-blind safe pairs) and a contrast grid. You can copy any value, or a palette as CSS or JSON.
 
@@ -26,5 +27,5 @@ To publish with GitHub Pages: **Settings → Pages → Deploy from branch → `m
 | Path | What it is |
 | --- | --- |
 | `index.html` | The site: landing page and gallery |
-| `tokens/` | Figma variable exports (Primitives, Semantic, Utility, Extra) and `typography.css` with the text-size and effect styles |
+| `tokens/` | Figma variable exports (Primitives, Semantic, Utility, Extra) `extra.tokens.json` (radius, stroke and gap in W3C format) and `typography.css` with the text-size and effect styles |
 | `assets/` | Dopamine spike logo, dark-ink and white-ink versions |
