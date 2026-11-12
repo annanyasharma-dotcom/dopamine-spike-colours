@@ -137,6 +137,16 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .pill{all:unset;cursor:pointer;display:flex;align-items:center;gap:6px;border:1px solid var(--line-2);border-radius:999px;padding:3px 12px;font-size:15px;font-weight:500}
 .pill[aria-pressed="true"]{background:var(--btn);color:var(--btn-ink);border-color:var(--btn)}
 .pill:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.grp{all:unset;cursor:pointer;box-sizing:border-box;width:100%;display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--line);font-size:18px;font-weight:500;letter-spacing:-.01em;background:var(--panel)}
+.grp:hover{background:var(--panel-2)}
+.grp:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
+.grp .gc{font-size:13px;color:var(--ink-3);font-weight:500;margin-left:auto}
+.grp svg{flex:none;color:var(--ink-3);transition:transform .25s ease}
+.grp[aria-expanded="true"]{position:sticky;top:0;z-index:2}
+.grp[aria-expanded="true"] svg{transform:rotate(90deg)}
+.grp[aria-expanded="true"] .gc{color:var(--ink-2)}
+.gbody .item{padding-left:24px}
+.gbody .sec{padding-left:24px}
 .sec{padding:14px 20px 6px;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--line)}
 .stats dt{color:var(--ink-3)}.stats dd{margin:0;text-align:right;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 
@@ -277,7 +287,6 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     <aside class="lib">
       <div class="lib-head"><h2>Library</h2><button class="round" id="sortBtn" title="Sort by contrast" aria-label="Sort by contrast">≡▯</button></div>
       <label class="field"><input id="q" placeholder="Search" aria-label="Search palettes"><span class="kbd">⌘ K</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></label>
-      <div class="segs" role="tablist" aria-label="Show palettes"><button class="seg" role="tab" data-f="1" aria-selected="true">Primitives</button><button class="seg" role="tab" data-f="2" aria-selected="false">Semantic</button><button class="seg" role="tab" data-f="3" aria-selected="false">Type</button><button class="seg" role="tab" data-f="4" aria-selected="false">Layout</button></div>
       <div class="list" id="list"></div>
     </aside>
 
@@ -419,27 +428,47 @@ function textFor(s){
   for(const [tok,hex,fb] of cands){const r=cr(s.hex,hex);if(r>=4.5)return {tok,hex,fb,r}}
   const [tok,hex]=cands[cands.length-1];return {tok,hex,fb:true,r:cr(s.hex,hex)};
 }
-const syncTabs=()=>document.querySelectorAll(".seg").forEach(x=>x.setAttribute("aria-selected",+x.dataset.f===filter));
-const FIL=[["All palettes",()=>true],["Primitives",p=>p.kind==="Primitive"],["Semantic",p=>p.kind!=="Primitive"],["Type",()=>false],["Layout",()=>false]];
-function renderList(){
-  const q=$("q").value.trim().toLowerCase();
-  if(filter===4){$("list").innerHTML=renderLayoutList(q)||`<p style="padding:20px;color:var(--ink-3)">No token matches “${q}”.</p>`;
-    $("list").querySelectorAll(".item").forEach(b=>b.onclick=()=>showLayout(b.dataset.id));return}
-  if(filter===3){$("list").innerHTML=renderTypeList(q)||`<p style="padding:20px;color:var(--ink-3)">No style matches “${q}”.</p>`;
-    $("list").querySelectorAll(".item").forEach(b=>b.onclick=()=>showType(b.dataset.id));return}
-  let ps=pals.filter(FIL[filter][1]).filter(p=>!q||(p.name+" "+(p.path||"")+" "+p.sw.map(s=>s.hex+" "+s.tok+" "+(s.alias||"")).join(" ")).toLowerCase().includes(q));
+const syncTabs=()=>{openSec=filter};
+const FIL=[["All palettes",()=>true],["Primitives",p=>p.kind==="Primitive"],["Semantic",p=>p.kind!=="Primitive"],["Type",()=>false],["Layout",()=>false],["Elevation",()=>false]];
+let openSec=null;
+const SECS=[{f:1,name:"Primitives"},{f:2,name:"Semantic"},{f:3,name:"Type"},{f:4,name:"Layout"},{f:5,name:"Elevation"}];
+const chev='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>';
+function colourItems(fi,q){
+  let ps=pals.filter(FIL[fi][1]).filter(p=>!q||(p.name+" "+(p.path||"")+" "+p.sw.map(s=>s.hex+" "+s.tok+" "+(s.alias||"")).join(" ")).toLowerCase().includes(q));
   if(sorted)ps=[...ps].sort((a,b)=>b.best_c-a.best_c);
-  let html="",last="";
-  ps.forEach(p=>{
-    if(!sorted&&p.group!==last){html+=`<div class="sec">${p.group}${p.kind==="Semantic"?" tokens":""}</div>`;last=p.group}
+  let html="",last="",n=0;
+  ps.forEach(p=>{n++;
+    if(!sorted&&fi===2&&p.group!==last){html+=`<div class="sec">${p.group}${p.kind==="Semantic"?" tokens":""}</div>`;last=p.group}
     const top=p.sw.reduce((a,s)=>lum(s.hex)>lum(a.hex)?s:a);
     html+=`<button class="item" data-id="${p.id}" aria-current="${p.id===cur}">
       <div class="row1"><div class="bar">${p.sw.map(s=>`<i style="background:${s.hex}"></i>`).join("")}</div>
       <span class="mx" style="background:${top.hex};color:${onCol(top.hex)}">${p.best_c.toFixed(1)}</span></div>
       <div class="row2"><span class="n"><strong>${p.name}</strong><span class="chipx">${p.path||p.kind}</span></span>
       ${p.pairs?'<span class="aa ok">✓ AA</span>':'<span class="aa no">× AA</span>'}</div></button>`});
-  $("list").innerHTML=html||`<p style="padding:20px;color:var(--ink-3)">No palette matches “${q}”.</p>`;
-  $("list").querySelectorAll(".item").forEach(b=>b.onclick=()=>show(b.dataset.id));
+  return [html,n];
+}
+const stripSec=h=>h.replace(/^<div class="sec">[^<]*<\/div>/,"");
+const countItems=h=>(h.match(/class="item"/g)||[]).length;
+function secBody(f,q){
+  if(f===1||f===2)return colourItems(f,q);
+  if(f===3){const h=stripSec(renderTypeList(q,"text"));return [h,countItems(h)]}
+  if(f===4){const h=stripSec(renderLayoutList(q));return [h,countItems(h)]}
+  const h=stripSec(renderTypeList(q,"elev"));return [h,countItems(h)];
+}
+const SEC_LABEL={1:n=>`${n} families`,2:n=>`${n} groups`,3:n=>`${n} groups`,4:n=>`${n} groups`,5:n=>`6 levels`};
+function renderList(){
+  const q=$("q").value.trim().toLowerCase();
+  if(openSec===null)openSec=filter;
+  let html="";
+  SECS.forEach(s=>{const [body,n]=secBody(s.f,q);if(q&&!n)return;
+    const open=q?true:openSec===s.f;
+    html+=`<button class="grp" data-f="${s.f}" aria-expanded="${open}">${chev}<span>${s.name}</span><span class="gc">${SEC_LABEL[s.f](n)}</span></button>`;
+    if(open)html+=`<div class="gbody">${body}</div>`});
+  $("list").innerHTML=html||`<p style="padding:20px;color:var(--ink-3)">Nothing matches “${q}”.</p>`;
+  $("list").querySelectorAll(".grp").forEach(b=>b.onclick=()=>{const f=+b.dataset.f;openSec=openSec===f?0:f;renderList();
+    if(openSec===f){const el=$("list").querySelector(`.grp[data-f="${f}"]`);el&&el.scrollIntoView({block:"nearest"})}});
+  $("list").querySelectorAll(".item").forEach(b=>b.onclick=()=>{const id=b.dataset.id;
+    (id.startsWith("type-")?showType:id.startsWith("lay-")?showLayout:show)(id)});
 }
 const copyIc='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>';
 function show(id){
@@ -495,8 +524,8 @@ const TG=[
 ].map(g=>({...g,kind:"Type",items:TXT.filter(t=>g.match(t.style))}));
 TG.push({id:"type-elevation",name:"Elevation",kind:"Type",character:"Layered",items:[],best:"Best for lifting cards, sheets and menus off the page. Each level pairs a downward shadow with a faint upward one."});
 let tSample="";
-function renderTypeList(q){
-  const ts=TG.filter(g=>!q||(g.name+" "+g.items.map(t=>t.tok).join(" ")+(g.id==="type-elevation"?" shadow effect xs s md lg xl xxl":"")).toLowerCase().includes(q));
+function renderTypeList(q,which){
+  const ts=TG.filter(g=>which==="elev"?g.id==="type-elevation":g.id!=="type-elevation").filter(g=>!q||(g.name+" "+g.items.map(t=>t.tok).join(" ")+(g.id==="type-elevation"?" shadow effect xs s md lg xl xxl":"")).toLowerCase().includes(q));
   return `<div class="sec">Text styles</div>`+ts.map(g=>{
     const sizes=[...new Set(g.items.map(t=>t.px))].sort((a,b)=>b-a);
     const prev=g.id==="type-elevation"?`<span class="titem" style="gap:8px">${SHADOWS.map(s=>`<i style="display:inline-block;width:22px;height:22px;border-radius:6px;background:#fff;box-shadow:${s[1]}"></i>`).join("")}</span>`
@@ -508,7 +537,7 @@ function renderTypeList(q){
 function cssFor(t){return `font-family: "${FAMILY}", sans-serif;\nfont-size: ${t.px}px; /* var(--${t.tok}) */\nfont-weight: ${WT[t.weightName]||400};`}
 function showType(id){
   cur=id;const g=TG.find(x=>x.id===id);try{localStorage.setItem("dop-pal",id)}catch(e){}
-  filter=3;syncTabs();renderList();
+  filter=g.id==="type-elevation"?5:3;syncTabs();renderList();
   document.querySelector(".stage").dataset.mode="type";
   const sm=t=>tSample||g.sample;
   if(g.id==="type-elevation"){
