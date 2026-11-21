@@ -353,6 +353,14 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 
 /* sort menu */
 .lib{overflow:visible}
+.libcol{position:sticky;top:calc(env(safe-area-inset-top,0px) + 96px);display:flex;flex-direction:column;gap:12px;max-height:calc(100vh - 120px);min-height:0}
+.libcol>.lib{position:static;max-height:none;min-height:0}
+.libcol>.lib:first-child{flex:0 1 auto}
+.iccard{flex:none;padding:0;overflow:hidden}
+.iccard .grp{border-bottom:0;border-radius:28px}
+.iccard .grp[aria-expanded="true"]{border-bottom:1px solid var(--line);border-radius:28px 28px 0 0;position:static}
+.iccard .gbody .catrow:last-child{padding-bottom:16px}
+@media (max-width:900px){.libcol{position:static;max-height:none}.libcol>.lib:first-child{max-height:460px}}
 .list{border-radius:0 0 28px 28px}
 .sortwrap{position:relative}
 .round svg{display:block}
@@ -459,12 +467,15 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   </section>
 
   <div class="main">
+    <div class="libcol">
     <aside class="lib">
       <div id="sortHome" hidden><div class="sortwrap" id="sortwrap"><button class="round" id="sortBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="smenu" title="Sort palettes" aria-label="Sort palettes"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"/></svg></button></div></div>
       <div class="smenu" id="smenu" role="menu" aria-label="Sort palettes by" hidden></div>
       <label class="field" style="margin-top:0"><input id="q" placeholder="Search" aria-label="Search palettes"><span class="kbd">⌘ K</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></label>
       <div class="list" id="list"></div>
     </aside>
+    <nav class="lib iccard" id="icCard" aria-label="Icons"></nav>
+    </div>
 
     <section class="stage">
       <button class="back" id="back">Overview</button>
@@ -668,21 +679,21 @@ function renderList(){
       const on=cur.startsWith("lay-")||cur==="type-elevation";/* icons page has its own row */
       html+=`<button class="grp grp-link" data-k="4" aria-current="${on}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="4"/></svg><span>${name}</span><span class="gc">Playground →</span></button>`;return}
     const o=q?true:openSec===k;html+=head(k,name,SEC_LABEL[k](n),o,false);if(o)html+=`<div class="gbody">${body}</div>`});
-  if(!q||"icons iconography".includes(q)||ICONS.some(ic=>ic.name.includes(q)||ic.figma.includes(q))){
-    const icOpen=q?true:openSec===5;
-    html+=head("ic","Icons",`${ICONS.length} icons`,icOpen,false);
-    if(icOpen)html+=`<div class="gbody"><div class="sec">Categories</div>${IC_CATS.map(([lab,key])=>{const n=key==="all"?ICONS.length:ICONS.filter(i=>catOf(i)===key).length;
-      return `<button class="catrow" data-cat="${key}" aria-current="${cur==="icons"&&IC.cat===key}"><span>${lab}</span><small>${n}</small></button>`}).join("")}</div>`;
-  }
+  /* icons live in their own card under the library */
+  {const match=!q||"icons iconography".includes(q)||ICONS.some(ic=>ic.name.includes(q)||ic.figma.includes(q));
+   const card=$("icCard");card.hidden=!match;
+   if(match){const icOpen=q?true:icCardOpen;
+     card.innerHTML=head("ic","Icons",`${ICONS.length} icons`,icOpen,false)+(icOpen?`<div class="gbody"><div class="sec">Categories</div>${IC_CATS.map(([lab,key])=>{const n=key==="all"?ICONS.length:ICONS.filter(i=>catOf(i)===key).length;
+       return `<button class="catrow" data-cat="${key}" aria-current="${cur==="icons"&&IC.cat===key}"><span>${lab}</span><small>${n}</small></button>`}).join("")}</div>`:"");
+     card.querySelector(".grp").onclick=()=>{if(cur!=="icons"){icCardOpen=true;showIcons()}else{icCardOpen=!icCardOpen;renderList()}};
+     card.querySelectorAll(".catrow").forEach(b=>b.onclick=()=>showIcons(b.dataset.cat));}}
   $("list").innerHTML=html||`<p style="padding:20px;color:var(--ink-3)">Nothing matches “${q}”.</p>`;
   {const slot=$("sortSlot");if(slot)slot.replaceWith($("sortwrap"))}
   $("list").querySelectorAll(".grp").forEach(b=>b.onclick=()=>{const k=b.dataset.k;
     if(k==="4"){showLayout("lay-play");return}
-    if(k==="ic"){if(openSec===5){openSec=0;renderList()}else showIcons();return}
     {const v=k==="c"?"c":+k;openSec=openSec===v?0:v;justOpened=openSec===v?v:null;if(v==="c"&&openSec==="c"&&!openSub)openSub=1}
     if(openSec==="c"&&!openSub)openSub=1;
     renderList();const el=$("list").querySelector(`.grp[data-k="${k}"]`);el&&el.scrollIntoView({block:"nearest"})});
-  $("list").querySelectorAll(".catrow").forEach(b=>b.onclick=()=>showIcons(b.dataset.cat));
   $("list").querySelectorAll(".ctabs .seg").forEach(b=>b.onclick=()=>{openSub=+b.dataset.s;justOpened="c";renderList()});
   if(justOpened!==null){const g=$("list").querySelector(`.grp[data-k="${justOpened}"]`);justOpened=null;
     if(g&&g.nextElementSibling&&g.nextElementSibling.classList.contains("gbody")){const items=g.nextElementSibling.querySelectorAll(".item");
@@ -915,10 +926,11 @@ const IC_SIZES=[16,20,24,32,48];
 const IC_CATS=[["all","all"],["arrows","arrows"],["chevrons","chevrons"],["actions","actions"],["contact","contact"]];
 const catOf=ic=>ic.name.startsWith("arrow")?"arrows":ic.name.startsWith("chevron")?"chevrons":/phone/.test(ic.name)?"contact":"actions";
 IC.cat="all";
+let icCardOpen=false;
 function showIcons(cat){
   if(typeof cat==="string"&&cat!=="icons")IC.cat=cat;
   cur="icons";try{localStorage.setItem("dop-pal",cur)}catch(e){}
-  filter=5;openSec=5;renderList();
+  filter=5;icCardOpen=true;renderList();
   const st=document.querySelector(".stage");st.dataset.mode="icons";
   const tv=$("typeView");
   tv.innerHTML=`<div class="icbar">
