@@ -392,6 +392,15 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .icwt:hover{color:var(--ink)}
 .icwt[aria-selected="true"]{background:var(--btn);color:var(--btn-ink);font-weight:600}
 .icwt:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+/* match the Type "Try your own text" field: borderless pill on the field colour */
+.icbar{align-items:center}
+.icf{height:auto;min-height:42px;padding:10px 16px;gap:10px;border:0;border-radius:999px}
+.icf:focus-within{border-color:transparent;box-shadow:0 0 0 2px var(--line-2)}
+.icf input,.icf select{font-size:15px;font-weight:400}
+.icsize output{font-size:15px;font-weight:500}
+.icw{padding:4px;min-height:42px}
+.icwt{border-radius:999px;height:auto;min-height:34px;font-size:14px}
+@media (max-width:760px){.icf{padding:10px 14px}}
 @media (max-width:760px){.icf{padding:0 12px;gap:8px;height:50px}.icf input,.icf select,.icsize output{font-size:15px}.icchev{right:10px}.icsel select{padding-right:22px}.icsize output{min-width:40px}}
 .icx:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:4px}
 .icsel{position:relative;cursor:pointer}
@@ -934,7 +943,7 @@ function showIcons(cat){
   const st=document.querySelector(".stage");st.dataset.mode="icons";
   const tv=$("typeView");
   tv.innerHTML=`<div class="icbar">
-      <label class="icf icsearch"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <label class="icf icsearch">
         <input id="icQ" placeholder="Search icons" value="${IC.q.replace(/"/g,"&quot;")}" aria-label="Search icons"><button class="icx" id="icX" aria-label="Clear search" ${IC.q?"":"hidden"}>×</button></label>
       <div class="icf icw" role="tablist" aria-label="Weight">${["Regular","Bold"].map((n,i)=>`<button class="icwt" role="tab" data-v="${i}" aria-selected="${IC.variant===i}">${n}</button>`).join("")}</div>
       <label class="icf icsize"><output id="icSzV">${IC.size}px</output><input id="icSz" type="range" min="16" max="56" step="4" value="${IC.size}" aria-label="Icon size"></label>
